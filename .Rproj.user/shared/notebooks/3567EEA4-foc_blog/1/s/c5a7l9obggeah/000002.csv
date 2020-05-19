@@ -1,0 +1,11 @@
+"0","data <- left_join(data, weights %>% 
+               mutate(wt = weight) %>% # pick which weight to use 
+              select(prolificid, wt), by = c(""prolificid"" = ""prolificid""))  %>% 
+  select(b_foc, b_focfr, b_focqol, b_focwo, b_prec, 
+         b_prectyp_1, b_prectyp_6, b_prectyp_7, b_prectyp_8, 
+         b_prectyp_10, b_prectyp_11, b_prectypo, b_precqof, b_precs, wt) %>% 
+  mutate_at(vars(-wt),as_factor)
+"
+"2","Error: Can't subset columns that don't exist.
+[31mx[39m The column `wt` doesn't exist.
+"

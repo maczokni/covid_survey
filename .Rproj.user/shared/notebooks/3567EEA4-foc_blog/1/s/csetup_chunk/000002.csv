@@ -1,0 +1,6 @@
+"0","knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)"
+"0",""
+"0","library(haven)"
+"0","library(questionr) # https://juba.github.io/questionr/reference/index.html"
+"0","library(dplyr)"
+"0",""

@@ -1,0 +1,43 @@
+"0","  data <- data %>%
+  mutate(fearcovid_reka = case_when(
+            # Unworried
+            b_foc==""No"" ~ ""Unworried"", # not worried
+            # Functional
+            b_foc==""Yes"" & # worried about catching covid in past 3 weeks
+              b_focqol %in% c(""Not at all"", ""A little"") &  #  quality of life is not reduced by worry
+              b_prec==""No"" | # doesn't take precautions agaist covid
+              #OR
+              b_foc==""Yes"" & # worried about catching covid in past 3 weeks
+              b_focqol %in% c(""Not at all"", ""A little"") &  #  quality of life is not reduced by worry
+              b_prec==""Yes"" & # take precautions against catching covid
+              b_precqof %in% c(""Not at all"", ""A little"")  ~ ""Functional"", #  quality of life is not reduced by precaution
+             # b_precs %in% c(""Moderately"",""Quite a bit"",""Very much"") ~ ""Functional"", #prec make them feel safer
+            #Dysfunctional
+            b_foc==""Yes"" & # worried about covid
+              b_focqol %in% c(""Moderately"",""Quite a bit"",""Very much"") & #quality of life affected by worry
+              b_prec==""No"" | #doesn't take precaution
+              # OR
+              b_foc==""Yes"" & #worried about covid
+              b_focqol %in% c(""Moderately"",""Quite a bit"",""Very much"") &   #quality of life affected by worry
+              b_prec==""Yes"" & #takes precautions
+              b_precs %in% c(""Not at all"", ""A little"") | #precautions don't work
+              # OR
+              b_foc==""Yes"" & #worried about covid
+              b_focqol %in% c(""Moderately"",""Quite a bit"",""Very much"") &   #quality of life affected by worry
+              b_prec==""Yes"" & #takes precautions
+              b_precqof %in% c(""Moderately"",""Quite a bit"",""Very much""),
+             # OR
+              b_foc==""Yes"" & #worried about covid
+              b_focqol %in% c(""Moderately"",""Quite a bit"",""Very much"") &   #quality of life affected by worry
+              b_prec==""Yes"" & #takes precautions
+              b_precqof %in% c(""Not at all"", ""A little""), # precautions do not affect QoL
+            # OR
+            b_foc==""Yes"" & # worried about catching covid in past 3 weeks
+              b_focqol %in% c(""Not at all"", ""A little"") &  #  quality of life is not reduced by worry
+              b_prec==""Yes"" & # take precautions against catching covid
+              b_precqof %in% c(""Moderately"",""Quite a bit"",""Very much"") ~""Dysfunctional"", # precautions affect QoL
+            TRUE ~""???"") 
+  )
+"
+"2","Error: Case 3 (`b_foc == ""No"" ~ ""Unworried""`) must be a two-sided formula, not a logical vector
+"

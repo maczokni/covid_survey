@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589809738245.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "45BC2C04",
+    "lastKnownWriteTime" : 1564989491,
+    "last_content_update" : 1564989491,
+    "path" : "~/Dropbox (The University of Manchester)/student_safety_survey/transport_survey/London_chapter.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "224,23",
+        "scrollLine" : "216"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

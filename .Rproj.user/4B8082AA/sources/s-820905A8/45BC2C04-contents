@@ -1,0 +1,868 @@
+---
+title: "London Report"
+author: "Reka Solymosi & Andrew Newton"
+date: "14/03/2019"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(here)
+library(tidyverse)
+library(janitor)
+library(scales)
+library(RColorBrewer)
+library(vcd)
+```
+
+# Introduction
+
+## Basic information about London
+
+London is the capital city of the United Kingdom. Its most recent census was in 2011, which found that the  usually  resident  population  of  London  on  Census  Day  2011  (27  March)  was  8.17  million.
+London is constantly growing, and this number was 7.17 million at Census 2001, an increase of 1,002,000 or 14 per cent over the ten year period. Average  household  size  in  London  increased  from  2.35  persons  in  2001  to  2.47  persons  in  2011 (GLA Intelligence, 2013). 
+
+Much of this increase is due to immigration, London and the South East account for 50 per cent of all short term migrants in England and Wales. London alone accounts for 35 per cent of short-term migrants. 
+London authorities had the highest proportions of working-age people (approximated by 20 to 64 year olds in these data). The top 12 authorities with the highest proportion of their population in this group were in London. The 2011 Census showed 2.998 million people living in London were born in a country outside of the UK, equating to over one in three London residents. For England and Wales excluding London, 4.507 million persons were born outside the UK, less than one in ten. Of London’s 8.17 million inhabitants, 63.3 per cent were born in the UK, 12.2 per cent were born in Europe and 24.5 per cent were born elsewhere (GLA Intelligence, 2013). 
+
+London is characterised by a mix of areas with high levels of deprivation, as well as affluent areas. The English Indices of Deprivation 2015 are the Government’s primary measure of deprivation for small areas (known as LSOAs) in England. The English Indices of Deprivation are used by organisations, from government departments, local authorities, funding bodies to charities, businesses and community groups and by individuals to determine funding, target service provision, site facilities and generally to gain a better understanding of a local area. The main index is the Index of Multiple Deprivation, which combines measures across seven distinct aspects of deprivation. These are: income deprivation, employment deprivation, health deprivation and disability, education, skills and training deprivation, barriers to housing and services, living environment deprivation, and crime (Leeser, 2016).  
+
+22.5 per cent of London falls within the most deprived 20 per cent of England.Nearly two thirds of London LSOAs have above average levels of deprivation, with less than four per cent of LSOAs among the least deprived decile. The most deprived areas within London are within Inner London – in Hackney, Islington and Westminster, as well as Haringey and Tower Hamlets boroughs (Leeser, 2016). 
+
+In the 2017/18 school year, over 2.3 million students were registered at 172 higher education (HE) providers in the UK, of which nearly 382,000, or 16% of the UK total, were studying at 40 HE providers in London. By level of study there were nearly 253,000 undergraduates (66%) and nearly 129,000 postgraduates (34%) in London. 30% of all HE students in the capital were overseas students, of which 32% were from European Union (EU) countries and 68% were from Non-EU countries.
+
+Fifty-nine percent of HE students in London were women, and 33% of all students were 25 years or older. BAME students made up 48% of all UK students in London, compared with 19.5% of UK students at all other HE providers outside of London. The average number of students with a self-declared disability at an HE provider was 11% varying between 2% to 41% depending on the provider.
+ 
+
+## Basic information about London public transport
+
+Transport for London (TfL) is the integrated transport authority responsible for delivering the London Mayor’s aims for transport. The Mayor’s Transport Strategy sets an aim for 80 per cent of all trips to be made on foot, by cycle or using public transport by 2041 (Transport for London, 2018) and so there is great emphasis on health, safety and the quality of people’s experience in the strategies of London's transport authority (Transport for London, 2018). 
+
+TfL run most of London’s public transport services, including the London Underground,  London Buses, the Docklands Light Railway, London Overground, TfL Rail, London Trams,  London River Services, London Dial-a-Ride, Victoria Coach Station, Santander Cycles and the Emirates Air Line.Besides public transport, TfL are also responsible for some roads (the city’s red route strategic roads) and therefore consider congestion and road traffic issues as well (Transport for London, 2018). 
+
+Regarding usage, in 2017 26.8 million trips were made on an annual average day in London. A trip is defined as a one-way movement from an origin to a destination to achieve a specific  purpose, for example, to go from home to work. Each trip may involve travel by one or more individual modes of transport (Transport for London, 2018).
+
+Of the average of 26.8 million trips per day, public transport accounted for 36.9 per cent of trips in 2017 (Transport for London, 2018).
+
+Overall customer satisfaction with the main public transport modes is relatively high, now  typically scoring between 85 and 90 out of 100, and these scores have increased slowly over recent years. TfL has also developed a metric that measures the extent to which Londoners believe that TfL cares about its customers (including users of all modes); typically 45 and 50 per cent of people agree with this proposition (Transport for London, 2018).
+
+
+# Empirical study findings
+
+```{r}
+results <- read.csv(here("results-for-international-2019-03-14-0926.csv"))
+results <- results %>% clean_names()
+
+#it appears that there is a Yes that has been replaced with a blank, so rectify this
+
+results$x35_if_you_have_been_a_victim_of_sexual_assault_or_harassment_crime_while_on_the_bus_train_at_the_bus_stop_or_station_platform_or_on_your_way_to_from_the_transport_stop_have_you_reported_it_to_anyone <- ifelse(nchar(as.character(results$x36_to_whom_have_you_reported_the_sexual_assault_or_harassment_crime_mark_all_that_apply))> 1, "Yes", as.character( results$x35_if_you_have_been_a_victim_of_sexual_assault_or_harassment_crime_while_on_the_bus_train_at_the_bus_stop_or_station_platform_or_on_your_way_to_from_the_transport_stop_have_you_reported_it_to_anyone))
+```
+
+This section presents findings from our London survey. In total we received `r I(nrow(results))` responses. Of these `r I(nrow(results %>% filter(x3_to_which_gender_do_you_most_identify == "Female")))` identified as female, `r I(nrow(results %>% filter(x3_to_which_gender_do_you_most_identify == "Male")))` as male, and `r I(nrow(results %>% filter(x3_to_which_gender_do_you_most_identify == "Other")))` as other. Most respondents were between 18 - 29 years old (n = `r I(nrow(results %>% filter(x2_what_is_your_age == "18-29")))`), which is to be expected with a student sample.
+
+
+## Victimisation
+
+### What are the most prominent types of sexual harassment experienced by students?
+
+
+```{r}
+
+harass <- results 
+harass[,c(19, 21, 23, 39, 41, 43)] <- lapply(harass[,c(19, 21, 23, 39, 41, 43)], function(x) ifelse(x == "N/A" | length(x) < 2, 0, 1))
+harass <- as.data.frame(harass)
+harass$sum <- rowSums(harass[,c(19, 21, 23, 39, 41, 43)])
+
+#so this isn't really to do with harassment but these people report experiencing some form of harassment from the list, but then later on say that they have not experienced harassment, so best report on that here. 
+subset <- harass %>%  filter(sum > 0, x35_if_you_have_been_a_victim_of_sexual_assault_or_harassment_crime_while_on_the_bus_train_at_the_bus_stop_or_station_platform_or_on_your_way_to_from_the_transport_stop_have_you_reported_it_to_anyone == "I have not been a victim of sexual assault or harassment in a public transport transit environment")
+
+liars <- results %>% filter(unique_response_number %in% subset$unique_response_number)
+
+
+
+harass <- harass[,c(19, 21, 23, 39, 41, 43)]
+harass$sum <- rowSums(harass)
+
+
+
+
+```
+
+
+In total, `r I(nrow(harass %>% filter(sum != 0)))` respondents (`r I(round((nrow(harass %>% filter(sum != 0)) / nrow(harass))*100, 1))` %) reported experiencing some form of sexual harassment at least once in the last 3 years either walking to, waiting for, or on board of some mode of transport.
+
+However, 48 of these people answered to a later question about whether they reported this or not by selecting "I have not been a victim of sexual assault or harassment in a public transport transit environment" as an answer. This is pretty interesting. These 48 people repored experiencing the following: 
+
+```{r}
+
+datalist = list()
+j <- 1
+for (colnum in c(19, 21, 23, 39, 41, 43)){
+  codes <- paste(liars[,colnum], collapse = ",")
+  codes_df <- data.frame(
+    codes =  as.list(strsplit(codes, ",")[[1]]))
+  codes_df <- as.data.frame(t(codes_df))
+  rownames(codes_df) <- NULL
+  names(codes_df) <- c("code")
+  codes_df$code <- as.character(codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" honey" |
+                            codes_df$code==" sweetheart (or similar)" |
+                            codes_df$code=="Calling you babe", "Calling you babe, honey, sweetheart (or similar)", codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" touching inappropriately" |
+                            codes_df$code=="Gropping", "Gropping, touching inappropriately", codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" looks)" |
+                            codes_df$code=="Sexual comments (about clothing", "Sexual comments (about clothing, looks)", codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" remarks"|
+                            codes_df$code=="Unwanted sexual teasing", "Unwanted sexual teasing, remarks", codes_df$code)
+  codes_df$code <- ifelse(nchar(codes_df$code) < 1|
+                            codes_df$code=="N/A", NA, codes_df$code)
+  codes_df <- codes_df %>% 
+    group_by(code) %>% 
+    summarise (n=n())
+  codes_df$loc <- colnames(results[colnum])
+  datalist[[j]] <- codes_df
+  j <- j + 1
+  
+}
+
+liar_reps = do.call(rbind, datalist)
+liar_reps <- liar_reps %>% filter(n > 0)
+unique(liar_reps$code[!is.na(liar_reps$code)])
+```
+
+
+For the purposes of this section, I will include these reports as well. 
+
+
+```{r}
+
+datalist = list()
+j <- 1
+for (colnum in c(19, 21, 23, 39, 41, 43)){
+  codes <- paste(results[,colnum], collapse = ",")
+  codes_df <- data.frame(
+    codes =  as.list(strsplit(codes, ",")[[1]]))
+  codes_df <- as.data.frame(t(codes_df))
+  rownames(codes_df) <- NULL
+  names(codes_df) <- c("code")
+  codes_df$code <- as.character(codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" honey" |
+                            codes_df$code==" sweetheart (or similar)" |
+                            codes_df$code=="Calling you babe", "Calling you babe, honey, sweetheart (or similar)", codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" touching inappropriately" |
+                            codes_df$code=="Gropping", "Gropping, touching inappropriately", codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" looks)" |
+                            codes_df$code=="Sexual comments (about clothing", "Sexual comments (about clothing, looks)", codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" remarks"|
+                            codes_df$code=="Unwanted sexual teasing", "Unwanted sexual teasing, remarks", codes_df$code)
+  codes_df$code <- ifelse(nchar(codes_df$code) < 1|
+                            codes_df$code=="N/A", NA, codes_df$code)
+  codes_df <- codes_df %>% 
+    group_by(code) %>% 
+    summarise (n=n())
+  codes_df$loc <- colnames(results[colnum])
+  datalist[[j]] <- codes_df
+  j <- j + 1
+  
+}
+
+what_by_where <- do.call(rbind, datalist)
+
+what_by_where <- what_by_where %>% 
+  filter(!is.na(code)) %>% 
+  mutate(loc = forcats::fct_recode(loc, 
+                                 "Walking to/from train stop"= "x31_in_the_last_3_years_have_you_experienced_any_of_the_following_while_walking_to_from_the_train_station_tram_stop_please_mark_all_that_apply",
+                                 "Waiting at train stop" = "x30_in_the_last_3_years_have_you_experienced_any_of_the_following_while_waiting_at_the_train_station_tram_stop_please_mark_all_that_apply",
+                                 "On train" = "x29_in_the_last_3_years_have_you_experienced_any_of_the_following_while_travelling_on_the_train_tram_please_mark_all_that_apply",
+                                 "Walking to/from bus stop" = "x17_in_the_last_3_years_have_you_experienced_any_of_the_following_while_walking_to_from_the_bus_stop_please_mark_all_that_apply",
+                                 "Waiting at bus stop" = "x16_in_the_last_3_years_have_you_experienced_any_of_the_following_while_waiting_at_the_bus_stop_please_mark_all_that_apply",
+                                 "On bus" = "x15_in_the_last_3_years_have_you_experienced_any_of_the_following_while_travelling_on_the_bus_please_mark_all_that_apply"))
+
+
+alltogethernow <- what_by_where %>% group_by(code) %>% summarise(n = sum(n))
+
+```
+
+
+The most common form of harassment experienced across all modes was "`r I(alltogethernow %>% arrange(desc(n)) %>% filter(row_number()==1) %>% select(code) %>% pull())`", followed by "`r I(alltogethernow %>% arrange(desc(n)) %>% filter(row_number()==2) %>% select(code) %>% pull())`", and "`r I(alltogethernow %>% arrange(desc(n)) %>% filter(row_number()==3) %>% select(code) %>% pull())`".
+
+Figure shows the number of participants who reported each type of sexual harassment for each stage of travel (walking to, waiting for, and riding on) both modes in our survey (bus and train). 
+
+
+
+Figure 1: Volume of each type of harassment experienced by mode.
+
+```{r, fig.width=  8, fig.height=9}
+
+ggplot(what_by_where, aes(x = loc, y = n, fill = loc)) + 
+  geom_bar(stat = "identity") + 
+  coord_flip() + 
+  theme_bw() +
+  scale_fill_grey(guide = FALSE) +
+  facet_wrap(~code, ncol = 2) +
+  xlab("") + 
+  ylab("")
+
+
+```
+
+
+Respondents were also asked to provide details of any other types of harassment they experienced which were not covered by the above categories. These were: 
+
+```{r}
+
+other_sh <- results %>% select(x15_a_if_you_selected_other_please_specify, 
+                               x16_a_if_you_selected_other_please_specify,
+                               x17_a_if_you_selected_other_please_specify,
+                               x29_a_if_you_selected_other_please_specify,
+                               x30_a_if_you_selected_other_please_specify,
+                               x31_a_if_you_selected_other_please_specify) 
+
+other_sh_list <- other_sh[!is.na(other_sh)]
+other_sh_list <- other_sh_list[nchar(other_sh_list)>0]
+
+print(other_sh_list)
+
+```
+
+
+### What are the most common problems experienced by students while travelling on transit and how do they differ by gender?
+
+```{r}
+
+othercrim <- results %>% select(x41_in_the_last_3_years_have_you_been_exposed_to_other_serious_crime_assault_with_weapon_robbery_rape_while_on_the_bus_train_tram_at_the_bus_stop_or_train_tram_station_or_walking_to_from_the_stop_or_station, x43_in_the_last_3_years_has_someone_you_know_been_exposed_to_serious_crime_assault_with_weapon_robbery_rape_murder_while_on_the_bus_train_tram_or_commuting_train_at_the_bus_stop_or_station_platform_or_heading_to_from_the_transit_stop, x45_in_the_last_3_years_have_you_been_exposed_to_theft_pickpocket_jewellery_snatching_or_robbery_while_on_the_bus_train_tram_at_the_bus_train_tram_stop_or_station_platform_or_heading_to_from_the_stop_station)
+
+# othercrim <- lapply(othercrim, function(x) ifelse(x == "N/A" | length(x) < 2, 0, 1))
+# othercrim <- as.data.frame(othercrim)
+# othercrim$sum <- rowSums(othercrim)
+
+```
+
+
+When asked about other crime types, `r I(nrow(othercrim %>% filter(x41_in_the_last_3_years_have_you_been_exposed_to_other_serious_crime_assault_with_weapon_robbery_rape_while_on_the_bus_train_tram_at_the_bus_stop_or_train_tram_station_or_walking_to_from_the_stop_or_station=="Yes")))` respondents said "Yes" to having been exposed to other serious crime, assault with weapon, robbery, or rape while on the bus train tram at the bus stop or train tram station or walking to from the stop or station in the last 3 years, while `r I(nrow(othercrim %>% filter(x43_in_the_last_3_years_has_someone_you_know_been_exposed_to_serious_crime_assault_with_weapon_robbery_rape_murder_while_on_the_bus_train_tram_or_commuting_train_at_the_bus_stop_or_station_platform_or_heading_to_from_the_transit_stop=="Yes")))` answered 'Yes' to knowing someone who exposed to other serious crime, assault with weapon, robbery, or rape while on the bus train tram at the bus stop or train tram station or walking to from the stop or station in the last 3 years. 
+
+Finally, `r I(nrow(othercrim %>% filter(x45_in_the_last_3_years_have_you_been_exposed_to_theft_pickpocket_jewellery_snatching_or_robbery_while_on_the_bus_train_tram_at_the_bus_train_tram_stop_or_station_platform_or_heading_to_from_the_stop_station=="Yes")))` students answered yes to having been exposed to theft pickpocket jewellery snatching or robbery while on the bus train tram at the bus train tram stop or station platform or heading to from the stop station. 
+
+<!-- Question: "In the last 3 years have you experienced any of the follwing while travelling on, heading to, or waiting for the bus?"
+
+Question: "In the last 3 years have you experienced any of the follwing while travelling on, heading to, or waiting for the train?" -->
+
+### How temporal characteristics (day/night) of the transportation setting afect the incidence of crime and harassment?
+
+***I don't think we collected data about whether the victimisation was experienced during the day or after dark?***
+
+
+### Do victimised student and bystanders report crime?
+
+As mentioned earlier, `r I(nrow(liars))` students reported experiencing some form of sexual harassment in earlier questions, however, in response to the question "if you have been a victim of sexual assault or harassment crime while on the bus train at the bus stop or station platform or on your way to from the transport stop have you reported it to anyone" answered "I have not been a victim of sexual assault or harassment in a public transport transit environment". In this section we analyse only the responses of those who answered either "Yes" or "No". In total `r I(nrow(results %>%filter(x35_if_you_have_been_a_victim_of_sexual_assault_or_harassment_crime_while_on_the_bus_train_at_the_bus_stop_or_station_platform_or_on_your_way_to_from_the_transport_stop_have_you_reported_it_to_anyone=="Yes")))` respondents said "Yes", and `r I(nrow(results %>%filter(x35_if_you_have_been_a_victim_of_sexual_assault_or_harassment_crime_while_on_the_bus_train_at_the_bus_stop_or_station_platform_or_on_your_way_to_from_the_transport_stop_have_you_reported_it_to_anyone=="No")))` said "No". This does not allow us to go into much more than just descriptive detail. 
+
+
+
+```{r}
+#make function to count occurence of separating char
+countCharOccurrences <- function(char, s) {
+  s2 <- gsub(char,"",s)
+  return (nchar(s) - nchar(s2))
+}
+#use function to count number of categories
+yesreps <- results %>%  filter(nchar(as.character(results$x36_to_whom_have_you_reported_the_sexual_assault_or_harassment_crime_mark_all_that_apply))> 1)
+yesreps$numreps <- sapply(as.character(yesreps$x36_to_whom_have_you_reported_the_sexual_assault_or_harassment_crime_mark_all_that_apply), function(x) countCharOccurrences(",", x))
+yesreps$numreps <- yesreps$numreps + 1
+```
+
+
+Of the `r I(nrow(yesreps))` respondents who reported their experience to someone, `r I(nrow(yesreps %>%  filter(numreps == 1)))` reported to only one person. These were `r I(yesreps%>% filter(numreps == 1) %>% select(x36_to_whom_have_you_reported_the_sexual_assault_or_harassment_crime_mark_all_that_apply) %>% pull())`. The other `r I(nrow(yesreps %>%  filter(numreps > 1)))` people reported to `r I(yesreps %>% filter(numreps > 1) %>% select(numreps) %>% pull())` different groups of people. These were `r I(unique(unlist(strsplit(paste(unlist(yesreps %>% filter(numreps > 1) %>% select(x36_to_whom_have_you_reported_the_sexual_assault_or_harassment_crime_mark_all_that_apply)  %>% pull()), collapse = ","), ","))))`. None of them selected "Other". 
+
+
+```{r}
+
+noreps <- results %>%  filter(nchar(as.character(results$x38_can_you_indicate_why_you_have_not_reported_the_sexual_assault_or_harassment_crime_mark_all_that_apply))> 1)
+noreps$numreps <- sapply(as.character(noreps$x38_can_you_indicate_why_you_have_not_reported_the_sexual_assault_or_harassment_crime_mark_all_that_apply), function(x) countCharOccurrences(",", x))
+noreps$numreps <- noreps$numreps + 1
+
+```
+
+The `r I(nrow(noreps))` people who did not report to anyone listed the following reasons: 
+
+```{r}
+unique(unlist(strsplit(paste(unlist(noreps %>% filter(numreps > 1) %>% select(x38_can_you_indicate_why_you_have_not_reported_the_sexual_assault_or_harassment_crime_mark_all_that_apply)  %>% pull()), collapse = ","), ",")))
+
+```
+
+
+Two people also selected "other" reasons for not reporting, not provided in the list. These were:
+
+```{r}
+unique(unlist(strsplit(paste(unlist(noreps %>% select(x38_a_if_you_selected_other_please_specify) %>% filter(nchar(as.character(x38_a_if_you_selected_other_please_specify))>0)  %>% pull()), collapse = ","), ",")))
+
+```
+
+Students were also asked about the reactions of bystanders. `r I(nrow(results %>% filter(x39_did_anyone_witness_the_sexual_assault_or_harassment_crime == "Yes")))` respondents reported "Yes" that someone has witnessed the incident. `r I(nrow(results %>% filter(x39_did_anyone_witness_the_sexual_assault_or_harassment_crime == "No")))` reported that "No", there were no witnesses, while `r I(nrow(results %>% filter(nchar(as.character(x39_did_anyone_witness_the_sexual_assault_or_harassment_crime)) < 1)))` did not answer this question. 
+
+Of the `r I(nrow(results %>% filter(x39_did_anyone_witness_the_sexual_assault_or_harassment_crime == "Yes")))` reports of a bystander, `r I(nrow(results %>% filter(x40_what_was_the_reaction_of_other_people_witnessing_the_sexual_assault_or_harassment_while_on_the_bus_train_tram_at_the_bus_stop_or_station_platform_or_heading_to_from_the_transit_station_or_stop == "They came forward and talked to me")))` said the bystander "came forward and talked to me", `r I(nrow(results %>% filter(x40_what_was_the_reaction_of_other_people_witnessing_the_sexual_assault_or_harassment_while_on_the_bus_train_tram_at_the_bus_stop_or_station_platform_or_heading_to_from_the_transit_station_or_stop == "They pretended not seeing what was happening")))` said "They pretended not seeing what was happening", and `r I(nrow(results %>% filter(x40_what_was_the_reaction_of_other_people_witnessing_the_sexual_assault_or_harassment_while_on_the_bus_train_tram_at_the_bus_stop_or_station_platform_or_heading_to_from_the_transit_station_or_stop == "They watched at a distance what was happening")))` said "They watched at a distance what was happening". 
+
+
+
+
+## Fear/ perception
+
+### Do students feel safe using transit and how does this differ by mode of travel and demographics?
+
+```{r}
+results <- results %>% 
+  mutate(busworry = ifelse(x10_do_you_feel_safe_when_using_the_bus_after_dark %in% c("Rarely","Never")
+                           | x8_do_you_feel_safe_when_using_the_bus_during_daytime %in% c("Rarely","Never") | x9_do_you_feel_safe_waiting_at_the_bus_stop_during_daytime %in% c("Rarely","Never") | x11_do_you_feel_safe_walking_to_or_waiting_at_the_bus_stop_after_dark %in% c("Rarely","Never"), "worry", "no worry"),
+         trainworry = ifelse(x22_do_you_feel_safe_when_using_the_train_tram_during_daytime %in% c("Rarely","Never")
+                           | x23_do_you_feel_safe_waiting_at_train_tram_stations_and_stops_during_the_daytime %in% c("Rarely","Never") | x24_do_you_feel_safe_when_using_the_train_tram_after_dark %in% c("Rarely","Never") | x25_do_you_feel_safe_walking_to_or_waiting_at_the_train_tram_station_stop_after_dark %in% c("Rarely","Never"), "worry", "no worry"))
+
+```
+
+
+Overall, `r I(round(nrow(results %>% filter(busworry == "worry"))/nrow(results)*100))`% of respondents reported rarely or never feeling safe when either using or waiting for the bus either during the day or after dark, compared with `r I(round(nrow(results %>% filter(trainworry == "worry"))/nrow(results)*100))`% reporting the same for the train or tram. 
+
+Breaking down by gender, `r I(round(nrow(results %>% filter(busworry == "worry" & x3_to_which_gender_do_you_most_identify=="Female"))/nrow(results %>% filter(x3_to_which_gender_do_you_most_identify=="Female"))*100))`% of women in the sample reported being worried on buses, compared with `r I(round(nrow(results %>% filter(busworry == "worry" & x3_to_which_gender_do_you_most_identify=="Male"))/nrow(results %>% filter(x3_to_which_gender_do_you_most_identify=="Male"))*100))`% of the male respondents. 
+
+On the trains and trams, `r I(round(nrow(results %>% filter(trainworry == "worry" & x3_to_which_gender_do_you_most_identify=="Female"))/nrow(results %>% filter(x3_to_which_gender_do_you_most_identify=="Female"))*100))`% of women in the sample reported being worried, compared with `r I(round(nrow(results %>% filter(trainworry == "worry" & x3_to_which_gender_do_you_most_identify=="Male"))/nrow(results %>% filter(x3_to_which_gender_do_you_most_identify=="Male"))*100))`% of the male respondents. 
+
+
+### How does safecty vary between on transport/ waiting for transport/ walking to transport
+
+
+People are more worried in the night time than in the day time. 
+
+```{r, fig.height=6, fig.width=8}
+
+
+results %>% 
+  select(x10_do_you_feel_safe_when_using_the_bus_after_dark, 
+           x8_do_you_feel_safe_when_using_the_bus_during_daytime,
+         x9_do_you_feel_safe_waiting_at_the_bus_stop_during_daytime,
+         x11_do_you_feel_safe_walking_to_or_waiting_at_the_bus_stop_after_dark) %>%
+    gather("location", "worry") %>% 
+  filter(nchar(worry) > 0 ) %>% 
+#  mutate(worry = gsub("(*UCP)(*UTF)????T","'",worry, perl= TRUE)) %>% 
+  filter(worry %in% c("Always", "Often","Sometimes","Rarely","Never")) %>% 
+  mutate(worry = factor(worry, levels = c("Never", "Rarely", "Sometimes", "Often","Always")),
+         location = forcats::fct_recode(location, 
+                                        "Using bus after dark"= "x10_do_you_feel_safe_when_using_the_bus_after_dark",
+                                        "Using bus day time" = "x8_do_you_feel_safe_when_using_the_bus_during_daytime",
+                                        "Waiting for bus daytime" = "x9_do_you_feel_safe_waiting_at_the_bus_stop_during_daytime",
+                                        "Walking to or waiting for\n bus night time" = "x11_do_you_feel_safe_walking_to_or_waiting_at_the_bus_stop_after_dark")) %>%
+  group_by(location,worry) %>% 
+  summarise(n = n()) %>% 
+  mutate(freq = n/sum(n)) %>% 
+  ggplot(., aes(x = location, y = freq, fill = worry)) +
+  geom_bar(poisiton = "fill", stat = "identity") +
+  scale_y_continuous(labels = percent_format()) + 
+  scale_fill_grey("Feeling safe") + 
+  theme_minimal() + 
+  xlab("") + 
+  ylab("% of respondents") + 
+  theme(text = element_text(size=18),
+        axis.text.x = element_text(angle=47, hjust=1))
+
+
+```
+
+
+`r I(round(nrow(results %>% select(x8_do_you_feel_safe_when_using_the_bus_during_daytime) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried"))/nrow(results %>% select(x8_do_you_feel_safe_when_using_the_bus_during_daytime) %>%                                                 gather("location", "worry") %>%                                                 mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")))*100))`%
+ of respondents said they either rarely or never felt safe when using the bus during the day, compared with `r I(round(nrow(results %>%       select(x10_do_you_feel_safe_when_using_the_bus_after_dark) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried"))/nrow(results %>% select(x10_do_you_feel_safe_when_using_the_bus_after_dark) %>%                                                 gather("location", "worry") %>%                                                 mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")))*100))`% who said they rarely or never felt safe when using the bus after dark.
+ 
+
+Similarly for waiting for the bus, `r I(round(nrow(results %>%       select(x9_do_you_feel_safe_waiting_at_the_bus_stop_during_daytime) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried"))/nrow(results %>% select(x9_do_you_feel_safe_waiting_at_the_bus_stop_during_daytime) %>%                                                 gather("location", "worry") %>%                                                 mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")))*100))`% felt safe rarely or never when waiting at bus stops during the day, while `r I(round(nrow(results %>%       select(x11_do_you_feel_safe_walking_to_or_waiting_at_the_bus_stop_after_dark) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried"))/nrow(results %>% select(x11_do_you_feel_safe_walking_to_or_waiting_at_the_bus_stop_after_dark) %>%                                                 gather("location", "worry") %>%                                                 mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")))*100))`% felt safe rarely or never when waiting after dark.   
+
+
+Similar case for the train or tram:
+
+```{r, fig.height=6, fig.width=8}
+
+results %>% 
+  select(x22_do_you_feel_safe_when_using_the_train_tram_during_daytime,
+         x23_do_you_feel_safe_waiting_at_train_tram_stations_and_stops_during_the_daytime,
+         x24_do_you_feel_safe_when_using_the_train_tram_after_dark,
+         x25_do_you_feel_safe_walking_to_or_waiting_at_the_train_tram_station_stop_after_dark) %>%
+  gather("location", "worry") %>% 
+  filter(nchar(worry) > 0 ) %>% 
+#  mutate(worry = gsub("(*UCP)(*UTF)????T","'",worry, perl= TRUE)) %>% 
+  filter(worry %in% c("Often","Sometimes","Rarely","Never","Always")) %>% 
+  mutate(worry = factor(worry, levels = c("Never", "Rarely", "Sometimes", "Often","Always")),
+         location = forcats::fct_recode(location, 
+                                        "Using train/tram after dark"= "x24_do_you_feel_safe_when_using_the_train_tram_after_dark",
+                                        "Using train/tram day time" = "x22_do_you_feel_safe_when_using_the_train_tram_during_daytime",
+                                        "Waiting for train/tram daytime" = "x23_do_you_feel_safe_waiting_at_train_tram_stations_and_stops_during_the_daytime",
+                                        "Walking to or waiting for\n train/tram night time" = "x25_do_you_feel_safe_walking_to_or_waiting_at_the_train_tram_station_stop_after_dark")) %>%
+  group_by(location,worry) %>% 
+  summarise(n = n()) %>% 
+  mutate(freq = n/sum(n)) %>% 
+  ggplot(., aes(x = location, y = freq, fill = worry)) +
+  geom_bar(poisiton = "fill", stat = "identity") +
+  scale_y_continuous(labels = percent_format()) + 
+  scale_fill_grey("Feeling safe") + 
+  theme_minimal() + 
+  xlab("") + 
+  ylab("% of respondents") + 
+  theme(text = element_text(size=18),
+        axis.text.x = element_text(angle=47, hjust=1))
+
+
+
+
+```
+
+`r I(round(nrow(results %>%       select(x22_do_you_feel_safe_when_using_the_train_tram_during_daytime) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried"))/nrow(results %>% select(x22_do_you_feel_safe_when_using_the_train_tram_during_daytime) %>%                                                 gather("location", "worry") %>%                                                 mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")))*100))`%
+ of respondents said they either rarely or never felt safe when using the tram during the day (n = `r round(nrow(results %>%       select(x22_do_you_feel_safe_when_using_the_train_tram_during_daytime) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried")),0)`), compared with `r I(round(nrow(results %>%       select(x24_do_you_feel_safe_when_using_the_train_tram_after_dark) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried"))/nrow(results %>% select(x24_do_you_feel_safe_when_using_the_train_tram_after_dark) %>%                                                 gather("location", "worry") %>%                                                 mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")))*100))`% who said they rarely or never felt safe when using the tram after dark (n = `r round(nrow(results %>%       select(x24_do_you_feel_safe_when_using_the_train_tram_after_dark) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried")),0)`).
+ 
+
+Similarly for walking to or waiting for the train, `r I(round(nrow(results %>%       select(x23_do_you_feel_safe_waiting_at_train_tram_stations_and_stops_during_the_daytime) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried"))/nrow(results %>% select(x23_do_you_feel_safe_waiting_at_train_tram_stations_and_stops_during_the_daytime) %>%                                                 gather("location", "worry") %>%                                                 mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")))*100))`% felt safe rarely or never when waiting at train or tram stops during the day (n = `r round(nrow(results %>%       select(x23_do_you_feel_safe_waiting_at_train_tram_stations_and_stops_during_the_daytime) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried")),0)`), while `r I(round(nrow(results %>%       select(x25_do_you_feel_safe_walking_to_or_waiting_at_the_train_tram_station_stop_after_dark) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried"))/nrow(results %>% select(x25_do_you_feel_safe_walking_to_or_waiting_at_the_train_tram_station_stop_after_dark) %>%                                                 gather("location", "worry") %>%                                                 mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")))*100))`% felt safe rarely or never when waiting after dark (n = `r round(nrow(results %>%       select(x25_do_you_feel_safe_walking_to_or_waiting_at_the_train_tram_station_stop_after_dark) %>%       gather("location", "worry") %>%        mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried")) %>%        filter(binary_worry == "Worried")),0)`).  
+
+
+```{r}
+
+bustraindaynight <- results %>% 
+   select(x22_do_you_feel_safe_when_using_the_train_tram_during_daytime,
+          x23_do_you_feel_safe_waiting_at_train_tram_stations_and_stops_during_the_daytime,
+          x24_do_you_feel_safe_when_using_the_train_tram_after_dark,
+          x25_do_you_feel_safe_walking_to_or_waiting_at_the_train_tram_station_stop_after_dark, 
+           x8_do_you_feel_safe_when_using_the_bus_during_daytime,
+         x9_do_you_feel_safe_waiting_at_the_bus_stop_during_daytime,
+         x11_do_you_feel_safe_walking_to_or_waiting_at_the_bus_stop_after_dark) %>%
+   gather("location", "worry") %>% 
+   filter(nchar(worry) > 0 ) %>% 
+  mutate(worry = factor(worry, levels = c("Never", "Rarely", "Sometimes", "Often","Always")),
+         location = forcats::fct_recode(location, 
+                                        "Using train/tram after dark"= "x24_do_you_feel_safe_when_using_the_train_tram_after_dark",
+                                        "Using train/tram day time" = "x22_do_you_feel_safe_when_using_the_train_tram_during_daytime",
+                                        "Waiting for train/tram day time" = "x23_do_you_feel_safe_waiting_at_train_tram_stations_and_stops_during_the_daytime",
+                                        "Walking to or waiting for\n train/tram night time" = "x25_do_you_feel_safe_walking_to_or_waiting_at_the_train_tram_station_stop_after_dark", 
+                                        "Using bus after dark"= "x10_do_you_feel_safe_when_using_the_bus_after_dark",
+                                        "Using bus day time" = "x8_do_you_feel_safe_when_using_the_bus_during_daytime",
+                                        "Waiting for bus day time" = "x9_do_you_feel_safe_waiting_at_the_bus_stop_during_daytime",
+                                        "Walking to or waiting for\n bus night time" = "x11_do_you_feel_safe_walking_to_or_waiting_at_the_bus_stop_after_dark")) %>% 
+  mutate(binary_worry = ifelse(worry %in% c("Never", "Rarely"), "Worried", "Not worried"),
+         binary_waiton = ifelse(grepl("Using", location), "On board", "Waiting or walking"),
+         binary_daynight = ifelse(grepl("day time", location), "During day", "After dark"),
+         binary_mode = ifelse(grepl("bus", location), "Bus", "Train/tram"))
+
+```
+
+
+
+### How does social and physical environment of transit settings affect perceptions of safety?
+
+When asked which of the following do you perceive as being a significant problem, people mentioned the following: 
+
+
+```{r}
+
+datalist = list()
+j <- 1
+for (colnum in c(17, 18, 37, 38)){
+  codes <- paste(results[,colnum], collapse = ",")
+  codes_df <- data.frame(
+    codes =  as.list(strsplit(codes, ",")[[1]]))
+  codes_df <- as.data.frame(t(codes_df))
+  rownames(codes_df) <- NULL
+  names(codes_df) <- c("code")
+  codes_df$code <- as.character(codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" litter" |
+                            codes_df$code=="Vandalism", "Vandalism, litter", codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" murder)" |
+                            codes_df$code=="Violent crime (assault with a weapon" |
+                            grepl("assault with", codes_df$code), "Violent crime", codes_df$code)
+  codes_df$code <- ifelse(nchar(codes_df$code) < 1|
+                            codes_df$code=="NA", NA, codes_df$code)
+  codes_df <- codes_df %>% 
+    group_by(code) %>% 
+    summarise (n=n())
+  codes_df$loc <- colnames(results[colnum])
+  datalist[[j]] <- codes_df
+  j <- j + 1
+  
+}
+
+what_by_where <- do.call(rbind, datalist)
+
+what_by_where <- what_by_where %>% 
+  filter(!is.na(code)) %>% 
+  mutate(loc = forcats::fct_recode(loc, 
+                                 "On the bus"= "x13_which_of_the_following_do_you_perceive_as_being_a_significant_problem_on_the_buses_you_are_using_please_mark_all_that_apply",
+                                 "At the bus stop" = "x14_which_of_the_following_do_you_perceive_as_being_a_significant_problem_at_the_bus_stops_you_are_using_please_mark_all_that_apply",
+                                 "On the train" = "x27_which_of_the_following_do_you_perceive_as_being_a_significant_problem_on_the_trains_trams_you_are_using_please_mark_all_that_apply",
+                                 "At the train station/tram stop" = "x28_which_of_the_following_do_you_perceive_as_being_a_significant_problem_at_the_train_stations_tram_stops_you_are_using_please_mark_all_that_apply"))
+
+
+alltogethernow <- what_by_where %>% group_by(code) %>% summarise(n = sum(n))
+
+# knitr::kable(alltogethernow %>% 
+#   rename(Issue = code,
+#          Mentioned = n) %>% arrange(desc(Mentioned)))
+
+```
+
+
+
+
+
+
+```{r}
+
+#create dummy variables from the things people said they saw
+
+for(thing in alltogethernow$code){
+  
+ results[,ncol(results)+1] <- 
+         ifelse(grepl(thing,results$x13_which_of_the_following_do_you_perceive_as_being_a_significant_problem_on_the_buses_you_are_using_please_mark_all_that_apply) |
+                  grepl(thing,results$x14_which_of_the_following_do_you_perceive_as_being_a_significant_problem_at_the_bus_stops_you_are_using_please_mark_all_that_apply) |
+                  grepl(thing,results$x27_which_of_the_following_do_you_perceive_as_being_a_significant_problem_on_the_trains_trams_you_are_using_please_mark_all_that_apply) |
+                  grepl(thing,results$x28_which_of_the_following_do_you_perceive_as_being_a_significant_problem_at_the_train_stations_tram_stops_you_are_using_please_mark_all_that_apply),
+                1,0)
+  
+ 
+ names(results)[ncol(results)] <- thing
+  
+}
+
+results <- results %>% clean_names()
+
+```
+
+
+
+In total, `r I(round(nrow(results %>% filter(drunk_people == 1))/nrow(results)*100))`% of people asked selected Drunk people as an issue, 
+`r I(round(nrow(results %>% filter(begging == 1))/nrow(results)*100))`% of people asked selected Begging as an issue, 
+`r I(round(nrow(results %>% filter(poorly_illuminated == 1))/nrow(results)*100))`% of people said that Poor illumunation was an issue, 
+`r I(round(nrow(results %>% filter(poorly_guarded_empty_most_of_the_day == 1))/nrow(results)*100))`% of people said that stops being poorly guarded empty most of the day is a problem, 
+`r I(round(nrow(results %>% filter(pickpocketing == 1))/nrow(results)*100))`% of people asked selected Pickpocketing as an issue,  
+`r I(round(nrow(results %>% filter(vandalism_litter == 1))/nrow(results)*100))`% of people asked selected Vandalism, litter as an issue, 
+`r I(round(nrow(results %>% filter(obscene_language == 1))/nrow(results)*100))`% of people said that Obscene language is a problem,  
+`r I(round(nrow(results %>% filter(robbery == 1))/nrow(results)*100))`% of people said that Robbery is a problem, 
+`r I(round(nrow(results %>% filter(sexual_harassment == 1))/nrow(results)*100))`% of people said that Sexual harassment is a problem, 
+`r I(round(nrow(results %>% filter(verbal_physical_threats == 1))/nrow(results)*100))`% of people said that Verbal/physical threats are a problem,  
+`r I(round(nrow(results %>% filter(violent_crime == 1))/nrow(results)*100))`% of people said that Violent crime is a problem,  
+`r I(round(nrow(results %>% filter(drug_use_sales == 1))/nrow(results)*100))`% of people said that Drug use/sales are a problem, and finally only  
+`r I(round(nrow(results %>% filter(jewellery_snatching == 1))/nrow(results)*100))`% of people said that Jewellery snatching is a problem.  
+
+
+
+```{r, eval = FALSE}
+#By location: 
+knitr::kable(what_by_where %>% group_by(code, loc) %>% summarise(n = sum(n)) %>% 
+  rename(Issue = code,
+         Location = loc,
+         Mentioned = n) %>% arrange(desc(Mentioned)))
+
+```
+
+
+### Effect of fear
+
+Precautions:
+
+```{r, fig.width=  8, fig.height=9}
+
+datalist = list()
+j <- 1
+for (colnum in c(26,46)){
+
+codes <- paste(results[,colnum], collapse = ",")
+codes_df <- data.frame(
+  codes =  as.list(strsplit(codes, ",")[[1]]))
+codes_df <- as.data.frame(t(codes_df))
+rownames(codes_df) <- NULL
+names(codes_df) <- c("code")
+codes_df$code <- as.character(codes_df$code)
+
+codes_df$code <- ifelse(codes_df$code==" wallets" |
+                          codes_df$code=="Avoiding carrying purses" , "Avoiding carrying purses, wallets", codes_df$code)
+codes_df$code <- ifelse(nchar(codes_df$code) < 1|
+                          codes_df$code=="N/A", NA, codes_df$code)
+
+codes_df <- codes_df %>% 
+  group_by(code) %>% 
+  summarise (n=n())
+codes_df$loc <- colnames(results[colnum])
+datalist[[j]] <- codes_df
+j <- j + 1
+
+}
+
+prec_by_where = do.call(rbind, datalist)
+
+
+ prec_by_where<- prec_by_where %>% 
+  filter(!is.na(code)) %>% 
+  mutate(loc = forcats::fct_recode(loc, 
+                                   "Bus"= "x19_which_of_the_following_precautions_do_you_take_mark_all_that_apply",
+                                   "Train" = "x33_which_of_the_following_precautions_do_you_take_mark_all_that_apply")) 
+ 
+ prec_by_where%>%
+  ggplot(., aes(x = loc, y = n, fill = loc)) + 
+  geom_bar(stat = "identity") + 
+  coord_flip() + 
+  theme_bw() +
+  scale_fill_grey( guide = FALSE) +
+  facet_wrap(~code, ncol = 2) +
+  xlab("")  +
+  ylab("")
+
+```
+
+
+Broken down by gender:
+
+```{r, fig.width=8, fig.height=9}
+
+#dummies from the precaution categories
+results$all_precs <- paste(results$x19_which_of_the_following_precautions_do_you_take_mark_all_that_apply, results$x33_which_of_the_following_precautions_do_you_take_mark_all_that_apply, sep = ",")
+results$all_precs <- lapply(as.character(results$all_precs), function(x)  as.list(strsplit(x, ",")[[1]]))
+uniqueStrings2 <- unique(unlist(results$all_precs))
+n <- ncol(results)
+for (i in 1:length(uniqueStrings2)) {
+  results[,  n + i] <- sapply(results$all_precs, function(x) ifelse(uniqueStrings2[i] %in% x, 1, 0))
+  colnames(results)[n + i] <- paste0("prec_",uniqueStrings2[i])
+}
+results$`prec_ wallets` <- NULL
+results$prec_ <- NULL
+
+results <- results %>% 
+  clean_names()
+
+results %>% 
+  group_by(x3_to_which_gender_do_you_most_identify) %>% 
+  summarise_at(c("prec_always_travelling_with_someone_else",
+                 "prec_avoiding_carrying_purses", 
+                 "prec_dressing_a_certain_way",
+                "prec_avoiding_particular_bus_routes",
+                 "prec_avoiding_particular_bus_stops",
+                "prec_avoiding_particular_train_tram_routes",
+                "prec_avoiding_particular_train_tram_stops_stations",
+                "prec_carrying_some_kind_of_weapon", 
+                "prec_not_wearing_jewellery", 
+                "prec_sitting_close_to_the_driver", 
+                "prec_other",
+                "prec_travelling_only_during_daytime", 
+                "prec_waiting_for_buses_only_at_well_lit_places",
+                "prec_waiting_for_buses_only_if_other_people_are_around",
+                "prec_waiting_for_train_trams_only_at_well_lit_places",
+                "prec_waiting_for_train_trams_only_if_other_people_are_around"), sum) %>% 
+  gather("what", "n", -x3_to_which_gender_do_you_most_identify) %>%
+  mutate(what = gsub("prec_", "", what)) %>% 
+  mutate(what = gsub("_", " ", what)) %>%
+  filter(x3_to_which_gender_do_you_most_identify != "Other" & x3_to_which_gender_do_you_most_identify != "") %>% 
+  ggplot(., aes(x = x3_to_which_gender_do_you_most_identify, y = n, fill = x3_to_which_gender_do_you_most_identify)) + 
+  geom_bar(stat = "identity") + 
+  coord_flip() + 
+  theme_bw() +
+  scale_fill_grey(guide = FALSE) +
+  facet_wrap(~what, ncol = 2) + 
+  xlab("") + 
+  ylab("")
+
+```
+
+
+
+## Challenges and recommendations
+
+### What are the most commonly perceived challenges encountered by students?
+
+**This section repeats one of the ones above - maybe clarify with Vania what the difference is/should be?**
+
+
+```{r}
+
+datalist = list()
+j <- 1
+for (colnum in c(17, 18, 37, 38)){
+  codes <- paste(results[,colnum], collapse = ",")
+  codes_df <- data.frame(
+    codes =  as.list(strsplit(codes, ",")[[1]]))
+  codes_df <- as.data.frame(t(codes_df))
+  rownames(codes_df) <- NULL
+  names(codes_df) <- c("code")
+  codes_df$code <- as.character(codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" litter" |
+                            codes_df$code=="Vandalism", "Vandalism, litter", codes_df$code)
+  codes_df$code <- ifelse(codes_df$code==" murder)" |
+                            codes_df$code=="Violent crime (assault with a weapon" |
+                            grepl("assault with", codes_df$code), "Violent crime", codes_df$code)
+  codes_df$code <- ifelse(nchar(codes_df$code) < 1|
+                            codes_df$code=="NA", NA, codes_df$code)
+  codes_df <- codes_df %>% 
+    group_by(code) %>% 
+    summarise (n=n())
+  codes_df$loc <- colnames(results[colnum])
+  datalist[[j]] <- codes_df
+  j <- j + 1
+  
+}
+
+what_by_where <- do.call(rbind, datalist)
+
+what_by_where <- what_by_where %>% 
+  filter(!is.na(code)) %>% 
+  mutate(loc = forcats::fct_recode(loc, 
+                                 "On the bus"= "x13_which_of_the_following_do_you_perceive_as_being_a_significant_problem_on_the_buses_you_are_using_please_mark_all_that_apply",
+                                 "At the bus stop" = "x14_which_of_the_following_do_you_perceive_as_being_a_significant_problem_at_the_bus_stops_you_are_using_please_mark_all_that_apply",
+                                 "On the train" = "x27_which_of_the_following_do_you_perceive_as_being_a_significant_problem_on_the_trains_trams_you_are_using_please_mark_all_that_apply",
+                                 "At the train station/tram stop" = "x28_which_of_the_following_do_you_perceive_as_being_a_significant_problem_at_the_train_stations_tram_stops_you_are_using_please_mark_all_that_apply"))
+
+
+alltogethernow <- what_by_where %>% group_by(code) %>% summarise(n = sum(n))
+
+# knitr::kable(alltogethernow %>% 
+#   rename(Issue = code,
+#          Mentioned = n) %>% arrange(desc(Mentioned)))
+
+
+#create dummy variables from the things people said they saw
+
+for(thing in alltogethernow$code){
+  
+ results[,ncol(results)+1] <- 
+         ifelse(grepl(thing,results$x13_which_of_the_following_do_you_perceive_as_being_a_significant_problem_on_the_buses_you_are_using_please_mark_all_that_apply) |
+                  grepl(thing,results$x14_which_of_the_following_do_you_perceive_as_being_a_significant_problem_at_the_bus_stops_you_are_using_please_mark_all_that_apply) |
+                  grepl(thing,results$x27_which_of_the_following_do_you_perceive_as_being_a_significant_problem_on_the_trains_trams_you_are_using_please_mark_all_that_apply) |
+                  grepl(thing,results$x28_which_of_the_following_do_you_perceive_as_being_a_significant_problem_at_the_train_stations_tram_stops_you_are_using_please_mark_all_that_apply),
+                1,0)
+  
+ 
+ names(results)[ncol(results)] <- thing
+  
+}
+
+results <- results %>% clean_names()
+
+
+```
+
+
+In total, when asked about what issues people actually experienced or encountered, `r I(round(nrow(results %>% filter(drunk_people_2 == 1))/nrow(results)*100))`% of people asked selected Drunk people as an issue, 
+`r I(round(nrow(results %>% filter(begging_2 == 1))/nrow(results)*100))`% of people asked selected Begging as an issue, 
+`r I(round(nrow(results %>% filter(poorly_illuminated_2 == 1))/nrow(results)*100))`% of people said that Poor illumunation was an issue, 
+`r I(round(nrow(results %>% filter(poorly_guarded_empty_most_of_the_day_2 == 1))/nrow(results)*100))`% of people said that stops being poorly guarded empty most of the day is a problem, 
+`r I(round(nrow(results %>% filter(pickpocketing_2 == 1))/nrow(results)*100))`% of people asked selected Pickpocketing as an issue, 
+`r I(round(nrow(results %>% filter(vandalism_litter_2 == 1))/nrow(results)*100))`% of people asked selected Vandalism, litter as an issue, 
+`r I(round(nrow(results %>% filter(obscene_language_2 == 1))/nrow(results)*100))`% of people said that Obscene language is a problem,  
+`r I(round(nrow(results %>% filter(robbery_2 == 1))/nrow(results)*100))`% of people said that Robbery is a problem, 
+`r I(round(nrow(results %>% filter(sexual_harassment_2 == 1))/nrow(results)*100))`% of people said that Sexual harassment is a problem, 
+`r I(round(nrow(results %>% filter(verbal_physical_threats_2 == 1))/nrow(results)*100))`% of people said that Verbal/physical threats are a problem,  
+`r I(round(nrow(results %>% filter(violent_crime_2 == 1))/nrow(results)*100))`% of people said that Violent crime is a problem, 
+`r I(round(nrow(results %>% filter(drug_use_sales_2 == 1))/nrow(results)*100))`% of people said that Drug use/sales are a problem, and finally only  
+`r I(round(nrow(results %>% filter(jewellery_snatching_2 == 1))/nrow(results)*100))`% of people said that Jewellery snatching is a problem.  
+
+
+Evidently sexual harassment does not come up as one of the main issues that students report being concerned about. There is not a big difference between men and women here; `r I(round(nrow(results %>% filter(jewellery_snatching_2 == 1 & x3_to_which_gender_do_you_most_identify == "Female"))/nrow(results %>% filter(x3_to_which_gender_do_you_most_identify == "Female"))*100))`% of women and `r I(round(nrow(results %>% filter(jewellery_snatching_2 == 1 & x3_to_which_gender_do_you_most_identify == "Male"))/nrow(results %>% filter(x3_to_which_gender_do_you_most_identify == "Male"))*100))`% of men reported sexual harassment as a prominent concern.
+
+### Which are the system-wide suggestions made by students to improve transit safety
+
+Question: of the items below, select the 3 most important things that in your view can make travelling by bus etc safer
+
+```{r}
+
+
+datalist = list()
+j <- 1
+for (colnum in c(28, 48)){
+  codes <- paste(results[,colnum], collapse = ",")
+  codes_df <- data.frame(
+    codes =  as.list(strsplit(codes, ",")[[1]]))
+  codes_df <- as.data.frame(t(codes_df))
+  rownames(codes_df) <- NULL
+  names(codes_df) <- c("code")
+  codes_df$code <- as.character(codes_df$code)
+  codes_df$code <- ifelse(nchar(codes_df$code) < 1|
+                            codes_df$code=="NA", NA, codes_df$code)
+  codes_df <- codes_df %>% 
+    group_by(code) %>% 
+    summarise (n=n())
+  codes_df$loc <- colnames(results[colnum])
+  datalist[[j]] <- codes_df
+  j <- j + 1
+  
+}
+
+what_by_where <- do.call(rbind, datalist)
+
+what_by_where <- what_by_where %>% 
+  filter(!is.na(code)) %>% 
+  mutate(loc = forcats::fct_recode(loc, 
+                                 "Bus"= "x20_in_your_view_what_can_make_travelling_by_bus_safer_please_mark_up_to_the_three_most_important_from_the_following",
+                                 "Train/tram" = "x34_in_your_view_what_can_make_travelling_by_train_tram_safer_please_mark_the_three_most_important_from_the_following"))
+
+
+alltogethernow <- what_by_where %>% group_by(code) %>% summarise(n = sum(n))
+
+#create dummy variables from the things people said they saw
+
+for(thing in alltogethernow$code){
+  
+ results[,ncol(results)+1] <- ifelse(grepl(thing,results$x20_in_your_view_what_can_make_travelling_by_bus_safer_please_mark_up_to_the_three_most_important_from_the_following) | grepl(thing,results$x34_in_your_view_what_can_make_travelling_by_train_tram_safer_please_mark_the_three_most_important_from_the_following), 1, 0)
+  
+ 
+ names(results)[ncol(results)] <- thing
+  
+}
+
+results <- results %>% clean_names()
+
+
+```
+
+
+In total, `r I(round(nrow(results %>% filter(cameras_cctv_at_bus_stops == 1))/nrow(results)*100))`% of respondents recommended CCTV cameras at bus stops, 
+`r I(round(nrow(results %>% filter(cameras_cctv_at_train_stations_and_tram_stops == 1))/nrow(results)*100))`% of respondents recommended CCTV cameras at train stations and tram stops,
+`r I(round(nrow(results %>% filter(cameras_cctv_on_the_bus == 1))/nrow(results)*100))`% of respondents recommended CCTV cameras on the bus, 
+`r I(round(nrow(results %>% filter(cameras_cctv_on_the_train_tram == 1))/nrow(results)*100))`% of respondents recommended CCTV cameras on the train/tram, 
+`r I(round(nrow(results %>% filter(digital_timetable_at_bus_stops == 1))/nrow(results)*100))`% of respondents would like to see digital timetables at bus stops, 
+`r I(round(nrow(results %>% filter(digital_timetable_at_busy_stops_and_stations == 1))/nrow(results)*100))`% of respondents would like to see digital timetables at stops and stations, 
+`r I(round(nrow(results %>% filter(direct_police_line_at_bus_stop == 1))/nrow(results)*100))`% of respondents would like to direct police line at bus stop, 
+`r I(round(nrow(results %>% filter(direct_police_line_in_the_bus == 1))/nrow(results)*100))`% of respondents would like to direct police line on the bus, 
+`r I(round(nrow(results %>% filter(direct_police_line_at_train_stations_and_tram_stops == 1))/nrow(results)*100))`% of respondents would like to direct police line at train/tram stop, 
+`r I(round(nrow(results %>% filter(direct_police_line_on_the_train_tram == 1))/nrow(results)*100))`% of respondents would like to direct police line on the train/tram, 
+`r I(round(nrow(results %>% filter(more_lighting_at_bus_stops == 1))/nrow(results)*100))`% of respondents would like more lighting at bus stops, 
+`r I(round(nrow(results %>% filter(more_lighting_at_train_stations_and_tram_stops == 1))/nrow(results)*100))`% of respondents would like more lighting at train stations and tram stops, 
+`r I(round(nrow(results %>% filter(more_police_officers_patrolling_buses == 1))/nrow(results)*100))`% of respondents recommended more police officers patrolling buses, 
+`r I(round(nrow(results %>% filter(police_patrolling_train_stations_and_tram_stops == 1))/nrow(results)*100))`% of respondents recommended more police officers patrolling train stations and tram stops. Finally,
+`r I(round(nrow(results %>% filter(women_only_buses == 1))/nrow(results)*100))`% of respondents recommended women only buses and  
+`r I(round(nrow(results %>% filter(women_only_trains_trams == 1))/nrow(results)*100))`% of respondents recommended women only trains and trams. 
+
+There were a number of "other" suggestions as well. These were: 
+
+```{r}
+
+other_sugg <- results %>% select(x20_a_if_you_selected_other_please_specify, 
+                               x34_a_if_you_selected_other_please_specify) 
+
+other_sugg_list <- other_sugg[!is.na(other_sugg)]
+other_sugg_list <- other_sugg_list[nchar(other_sugg_list)>0]
+
+print(other_sugg_list)
+
+```
+
+
+
+
+
+# Conclusions and recommendations
+
+State briefly the coclusions and make suggestions for research and practice from your empirical study
+
+
+# References
+
+GLA Intelligence (2013) '2011 Census first results: London boroughs' populations by age by sex'. Greater London Authority. Available: https://data.london.gov.uk/census/reports/ Accessed: 22/03/2019
+
+
+London Higher (2019) LONDON HIGHER FACTSHEET 2019 STUDENTS IN HIGHER EDUCATION 2017/18 Available: https://www.londonhigher.ac.uk/news-resources/publications/key-factsheets/ Accessed:17/03/2019
+
+Leeser, Rachel (May 2016) Briefing 2016-01 English Indices of Deprivation 2015. Greater London Authority. ISBN 1479-7879. Available: https://data.london.gov.uk/dataset/indices-of-deprivation-2015 Accessed: 22/03/2019
+
+Transport for London (2018) 'Travel in LondonReport 11' Available: https://tfl.gov.uk/corporate/publications-and-reports/travel-in-london-reports#on-this-page-0 Accessed: 17/03/2019
