@@ -47,10 +47,10 @@ In total `r foc_tab %>% filter(b_foc == "Yes") %>% pull(perc)`% of people said t
 ## Functional/ Dysfunctional worry
 
 
-This is the table created by Jon's rules for Non-worried and Functionally worried groups, and everyone else as Dysfunctionally worried: 
+This is the table created by Jon's rules for Non-worried (foc = NO) and Functionally worried (worried about catching covid in past 3 weeks and quality of life is not reduced by worry and take precautions against catching covid and quality of life is not reduced by precaution and prec make them feel safer) groups, and everyone else as Dysfunctionally worried: 
 
 
-```{r functionalfearjonvar2}
+```{r functionalfearjonvar1}
 
 data <- data %>% 
   mutate(fearcovid = case_when(
@@ -72,7 +72,7 @@ data <- data %>%
 
 In this case I get the same table (almost, I found 3 extra people, need to check where they came from...!): 
 
-```{r jontable1}
+```{r jontable1, echo = FALSE}
 
 knitr::kable(data %>% group_by(fearcovid) %>% count())
 
@@ -83,7 +83,6 @@ knitr::kable(data %>% group_by(fearcovid) %>% count())
 But then I thought let's try to define the Dysfunctional group with logic too, so instead of saying all others are dysfunctional worried, I defined this group as: 
 
 worried about covid and quality of life affected by worry but doesn't take precaution
-
 
 OR
 
@@ -131,7 +130,7 @@ data <- data %>%
 This leaves another `r nrow(data %>% filter(fearcovid == "???"))` people who aren't classified by these parameters:
 
 
-```{r jontable2}
+```{r jontable2, echo = FALSE}
 
 knitr::kable(data %>% group_by(fearcovid) %>% count())
 
@@ -228,9 +227,10 @@ worried about covid and quality of life not affected by worry and takes precauti
 
 ```
 
+This changes the numbers to: 
 
 
-```{r rekatable}
+```{r rekatable, echo = FALSE}
 
 knitr::kable(data %>% group_by(fearcovid_reka) %>% count())
 
