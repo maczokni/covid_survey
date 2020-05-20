@@ -1,0 +1,217 @@
+---
+title: "Fear of Covid"
+author: "Reka Solymosi"
+date: "20/05/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+options(scipen = 999, digits = 1)
+
+library(haven)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(stringr)
+
+# read in data
+data <- read_dta("https://www.dropbox.com/s/04drikxtrznjogd/Covid-19_Police_Study_Longitudinal.dta?dl=1")
+
+
+data <- data  %>% 
+  select(a_covidjob, age, gender, educ, race, area, b_cov, b_foc, b_focfr, b_focqol, b_focwo, b_prec, 
+         b_prectyp_1, b_prectyp_6, b_prectyp_7, b_prectyp_8, 
+         b_prectyp_10, b_prectyp_11, b_prectypo, b_precqof, b_precs) %>% 
+  mutate_all(as_factor)
+
+```
+
+
+## Descriptives of worry about covid 19
+
+
+
+```{r focfreqtb, echo=FALSE}
+
+# foc_tab <- data %>% group_by(b_foc) %>% count(wt = wt) %>% mutate(perc = round(n / sum(.$n)*100,0))
+
+foc_tab <- data %>% filter(!is.na(b_foc)) %>% group_by(b_foc) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0))
+
+```
+
+
+In total `r foc_tab %>% filter(b_foc == "Yes") %>% pull(perc)`% of people said that they had felt worried about getting COVID-19 in the past 3 weeks. 
+
+Worry seems like a frequent occurrence rather than one-off incidences: 
+
+```{r worryfreq chart}
+
+data %>% 
+  filter(!is.na(b_focfr)) %>% 
+  group_by(b_focfr) %>% 
+  count() %>% 
+  mutate(perc = round(n / sum(.$n)*100,0)) %>% 
+  ggplot(., aes(x = b_focfr, y = perc/100)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label=paste0("n = ", n)),vjust=3, col = "white") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.4)) +
+  xlab("Frequency of worry") + 
+  ylab("Percent of respondents") + 
+  labs(title = "How frequently have you felt worried about getting COVID-19\nin the last three weeks?") +
+  theme_minimal() + 
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12))
+
+
+
+```
+
+
+
+People also report high intensity of worry, almost a quarter of respondents (23%) were 'very worried':
+
+
+```{r worryintens chart}
+
+data %>% 
+  filter(!is.na(b_focwo)) %>% 
+  group_by(b_focwo) %>% 
+  count() %>% 
+  mutate(perc = round(n / sum(.$n)*100,0)) %>% 
+  ggplot(., aes(x = b_focwo, y = perc/100)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label=paste0("n = ", n)),vjust=-1.5, col = "black") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.5)) +
+  xlab("Intensity of worry") + 
+  ylab("Percent of respondents") + 
+  labs(title = "On the last occasion [of worry], how worried did you feel?") +
+  theme_minimal() + 
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12), 
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+```
+
+
+
+```{r focqol}
+
+
+focqol <- data %>% 
+  filter(!is.na(b_focqol)) %>% 
+  group_by(b_focqol) %>% 
+  count() %>% 
+  mutate(perc = round(n / sum(.$n)*100,0))
+```
+
+
+
+In total half the people surveyed said their quality of life was affected by worry about COVID19 "Not at all" or "A little" (`r sum(focqol %>% filter(b_focqol %in% c("Not at all", "A little")) %>% pull(perc))`%), while the other half said their quality of life was "Moderately","Quite a bit", or "Very much" affected (`r sum(focqol %>% filter(b_focqol %in% c("Moderately","Quite a bit", "Very much")) %>% pull(perc))`%). 
+
+
+```{r focqolchart}
+
+
+  ggplot(focqol, aes(x = b_focqol, y = perc/100)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label=paste0("n = ", n)),vjust=-1.5, col = "black") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.5)) +
+  xlab("") + 
+  ylab("Percent of respondents") + 
+  labs(title = "To what extent was your quality of life reduced by your worry about COVID-19?") +
+  theme_minimal() + 
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12), 
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+## Descriptives of precautions
+
+```{r focprecs, echo=FALSE}
+
+prec_tab <- data %>% filter(!is.na(b_prec)) %>% group_by(b_prec) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0))
+precqol_tab <- data %>% filter(!is.na(b_precqof)) %>% group_by(b_precqof) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0))
+precs_tab <- data %>% filter(!is.na(b_precs)) %>% group_by(b_precs) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0))
+
+```
+
+
+Most people (`r prec_tab %>% filter(b_prec == "Yes") %>% pull(perc)`%) take some sort of precaution against COVID19. And for most of them,these precautions make them feel safer; `r sum(precs_tab %>% filter(b_precs %in% c("Not at all", "A little")) %>% pull(perc))`% say that these precautions make them feel safer "Not at all" or "A little", while the rest (`r sum(precs_tab %>% filter(b_precs %in% c("Moderately","Quite a bit", "Very much")) %>% pull(perc))`% ) say these precautions make them feel safer "Moderately","Quite a bit", or "Very much". 
+
+
+```{r precschart}
+
+ggplot(precs_tab, aes(x = b_precs, y = perc/100)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label=paste0("n = ", n)),vjust=-1.5, col = "black") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.5)) +
+  xlab("") + 
+  ylab("Percent of respondents") + 
+  labs(title = "To what extent do these precautions make you feel safer?") +
+  theme_minimal() + 
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12), 
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+
+On the flip side, `r sum(precqol_tab %>% filter(b_precqof %in% c("Not at all", "A little")) %>% pull(perc))`% of the people who take precatutions say that these precautions affect their quality of life "Not at all" or "A little", while the rest (`r sum(precqol_tab %>% filter(b_precqof %in% c("Moderately","Quite a bit", "Very much")) %>% pull(perc))`% ) say their quality of life is affected "Moderately","Quite a bit", or "Very much". 
+
+
+```{r precqolchart}
+
+ggplot(precqol_tab, aes(x = b_precqof, y = perc/100)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label=paste0("n = ", n)),vjust=-1.5, col = "black") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.5)) +
+  xlab("") + 
+  ylab("Percent of respondents") + 
+  labs(title = "To what extent do these precautions reduce your quality of life?") +
+  theme_minimal() + 
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12), 
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+Finally, regarding the type of precautions people reported taking the following precautions (people could select more than one): 
+
+```{r prectypes}
+
+pivot_longer(data %>% select(starts_with("b_prectyp_")), cols = starts_with("b_prectyp_"),  names_to = "prec_took") %>% group_by(value) %>% count() %>% filter(!is.na(value)) %>% mutate(w_value = str_wrap(value, 30)) %>% 
+  ggplot(., aes(x = reorder(w_value, n), y = n)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label=paste0("n = ", n)),hjust=-0.5, col = "black") +
+  ylim(c(0, 1200))  +
+  xlab("") + 
+  ylab("Percent of respondents") + 
+  labs(title = "Which of the following precautions do you take?\n(Mark all that apply)") +
+  theme_minimal() + 
+  theme(axis.title.y = element_text(size = 10),
+        axis.title.x = element_text(size = 14),
+        axis.text = element_text(size = 12), 
+        axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  coord_flip()
+
+
+```
+
+
+There was also a free text option for other types of precations people may take. `r nrow(data %>% filter(nchar(as.character(b_prectypo))>0))` people filled out this free text option. `r nrow(data %>% filter(grepl("wash", tolower(b_prectypo)) & grepl("hand", tolower(b_prectypo))))` of these were about washing hands. 
+
+```{r otherprec}
+
+knitr::kable(data %>% filter(nchar(as.character(b_prectypo))>0) %>% select(b_prectypo) )
+
+```
+

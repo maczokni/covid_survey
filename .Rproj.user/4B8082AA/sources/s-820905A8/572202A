@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589961364034.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "572202A",
+    "lastKnownWriteTime" : 98,
+    "last_content_update" : 1589961364034,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "B6D018",
+        "caption" : "prec_tab",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=prec_tab&cache_key=B6D018",
+        "displayedObservations" : 2,
+        "environment" : "",
+        "expression" : "prec_tab",
+        "object" : "prec_tab",
+        "preview" : 0,
+        "totalObservations" : 2,
+        "variables" : 3
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

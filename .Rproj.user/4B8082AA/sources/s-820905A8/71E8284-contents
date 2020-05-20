@@ -160,7 +160,8 @@ data %>%
 
 
 
-
+data %>% filter(
+  grepl("wash", tolower(b_prectypo)) & grepl("hand", tolower(b_prectypo)))
 
 # 0=unworried
 # 1=’functional fear’, i.e. worried about catching covid in past 3 weeks, take precautions against catching covid that make them feel safer (psychologists talk about worry often being a motivational force, stimulating people to problem-solve) and quality of life is not reduced by worry or precaution

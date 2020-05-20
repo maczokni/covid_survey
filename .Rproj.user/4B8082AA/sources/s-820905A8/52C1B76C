@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589960722060.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "52C1B76C",
+    "lastKnownWriteTime" : 140287518108160,
+    "last_content_update" : 1589960722060,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "782F9529",
+        "caption" : "focqol",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=focqol&cache_key=782F9529",
+        "displayedObservations" : 5,
+        "environment" : "",
+        "expression" : "focqol",
+        "object" : "focqol",
+        "preview" : 0,
+        "totalObservations" : 5,
+        "variables" : 3
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

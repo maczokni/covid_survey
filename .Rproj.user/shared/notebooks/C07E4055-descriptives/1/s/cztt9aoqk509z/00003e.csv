@@ -1,0 +1,17 @@
+"0","pivot_longer(data %>% select(starts_with(""b_prectyp_"")), cols = starts_with(""b_prectyp_""),  names_to = ""prec_took"") %>% group_by(value) %>% count() %>% filter(!is.na(value)) %>% mutate(w_value = str_wrap(value, 30)) %>% 
+  ggplot(., aes(x = reorder(w_value, n), y = n)) + 
+  geom_bar(stat = ""identity"") + 
+  geom_text(aes(label=paste0(""n = "", n)),hjust=-0.5, col = ""black"") +
+  ylim(c(0, 1200))  +
+  xlab("""") + 
+  ylab(""Percent of respondents"") + 
+  labs(title = ""Which of the following precautions do you take?\n(Mark all that apply)"") +
+  theme_minimal() + 
+  theme(axis.title.y = element_text(size = 10),
+        axis.title.x = element_text(size = 14),
+        axis.text = element_text(size = 12), 
+        axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  coord_flip()
+"
+"2","Factor `value` contains implicit NA, consider using `forcats::fct_explicit_na`"
+"2","Factor `value` contains implicit NA, consider using `forcats::fct_explicit_na`"

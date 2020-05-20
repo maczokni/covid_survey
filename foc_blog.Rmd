@@ -239,6 +239,56 @@ knitr::kable(data %>% group_by(fearcovid_reka) %>% count())
 
 
 
+Groups labelled separately:
+
+```{r alllabelled}
+
+ data <- data %>%
+  mutate(fearcovid_labels = case_when(
+            # Unworried
+            b_foc=="No" ~ "Unworried", # not worried
+            # Worry no prec
+            b_foc=="Yes" & # worried about catching covid in past 3 weeks
+              b_focqol %in% c("Not at all", "A little") &  #  quality of life is not reduced by worry
+              b_prec=="No" ~"Worried, QoL not reduced, No precs", # doesn't take precautions agaist covid
+              # Worry no qol
+              b_foc=="Yes" & # worried about catching covid in past 3 weeks
+              b_focqol %in% c("Not at all", "A little") &  #  quality of life is not reduced by worry
+              b_prec=="Yes" & # take precautions against catching covid
+              b_precqof %in% c("Not at all", "A little")  ~ "Worried, QoL not reduced, Takes precs, QoL not reduced", #  quality of life is not reduced by precaution
+            #Worry with qol no prec
+            b_foc=="Yes" & # worried about covid
+              b_focqol %in% c("Moderately","Quite a bit","Very much") & #quality of life affected by worry
+              b_prec=="No" ~"Worried, QoL is reduced, No precs", #doesn't take precaution
+            # worry quol prec no qol
+            b_foc=="Yes" & #worried about covid
+              b_focqol %in% c("Moderately","Quite a bit","Very much") &   #quality of life affected by worry
+              b_prec=="Yes" & #takes precautions
+              b_precs %in% c("Not at all", "A little") ~ "Worry, QoL reduced, Precs, QoL not reduced", #precautions don't work
+              # worry and prec qol
+              b_foc=="Yes" & #worried about covid
+              b_focqol %in% c("Moderately","Quite a bit","Very much") &   #quality of life affected by worry
+              b_prec=="Yes" & #takes precautions
+              b_precqof %in% c("Moderately","Quite a bit","Very much") ~ "worry and prec, both reduce qol", # precautions affect QoL
+            # worry no qol prec yes qol
+            b_foc=="Yes" & # worried about catching covid in past 3 weeks
+              b_focqol %in% c("Not at all", "A little") &  #  quality of life is not reduced by worry
+              b_prec=="Yes" & # take precautions against catching covid
+              b_precqof %in% c("Moderately","Quite a bit","Very much") ~"worry, QoL not reduced, but takes precs and these reduce qol", # precautions affect QoL
+            TRUE ~"???") 
+  )
+
+```
+
+```{r labelledtable, echo=FALSE}
+
+knitr::kable(data %>% group_by(fearcovid_labels) %>% count())
+
+```
+
+
+
+
 
 
 
