@@ -184,7 +184,9 @@ data %>% filter(
 
 
 
+table(data$b_covidworth, data$b_foc)
 
+data %>% filter(grepl("hand", tolower(data$b_prectypo)) & grepl("wash", tolower(data$b_prectypo))) %>% select(b_prectypo)
 
   
   

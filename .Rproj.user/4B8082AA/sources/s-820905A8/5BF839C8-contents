@@ -1,0 +1,16 @@
+so <- thing
+  rows <- grep(".*[\\d+],[\\d+].*", so, perl = T)
+  for(row in rows){
+    
+    # Get number and format into scientific notation
+    number <- as.numeric(sub(".*([0-9]{1,2}),([0-9]+\\.?[0-9]*).*", "\\1\\2", so[row], perl = T))
+    formatted_num <- sprintf("%.2e", number)
+    so[row] <- sub("(.*)[0-9]{1,2},[0-9]+\\.?[0-9]*(.*)", paste0("\\1", formatted_num, "\\2"), so[row], perl = T)
+  }
+  
+  # Print result
+  for(i in 1:length(so)){
+    cat(so[i], "\n")
+  }
+
+fixNumbers(thing)

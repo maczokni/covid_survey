@@ -1,0 +1,47 @@
+
+<table style="text-align:center"><tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="3"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="3" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td>Group 4</td><td>Group 1</td><td>Group 2</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td></tr>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">age25-44</td><td>0.6</td><td>0.5<sup>*</sup></td><td>0.5</td></tr>
+<tr><td style="text-align:left"></td><td>(0.5)</td><td>(0.4)</td><td>(0.8)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">age45-64</td><td>0.5</td><td>0.2<sup>***</sup></td><td>0.1<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.5)</td><td>(0.4)</td><td>(1.0)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">age65+</td><td>0.5</td><td>0.0<sup>***</sup></td><td>0.0<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.6)</td><td>(0.2)</td><td>(0.7)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">genderFemale</td><td>0.8</td><td>0.2<sup>***</sup></td><td>0.1<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.5)</td><td>(0.5)</td><td>(1.2)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceBAME</td><td>1.1</td><td>1.7</td><td>0.000</td></tr>
+<tr><td style="text-align:left"></td><td>(0.8)</td><td>(0.7)</td><td>(72.5)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">age25-44:genderFemale</td><td>1.2</td><td>3.2<sup>**</sup></td><td>3.4</td></tr>
+<tr><td style="text-align:left"></td><td>(0.6)</td><td>(0.5)</td><td>(1.4)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">age45-64:genderFemale</td><td>1.0</td><td>3.2<sup>**</sup></td><td>22.3<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.6)</td><td>(0.6)</td><td>(1.5)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">age65+:genderFemale</td><td>1.6</td><td>3,046,622,538,178,477,043,971,537,478,788,305,734,556,712,960.0<sup>***</sup></td><td>98,073,801,393,925,913,987,777,979,272,907,245,990,639,832,868,151,263,102,865,768,448.0<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.7)</td><td>(0.2)</td><td>(0.7)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">genderFemale:raceBAME</td><td>0.8</td><td>1.4</td><td>1.4</td></tr>
+<tr><td style="text-align:left"></td><td>(0.7)</td><td>(0.7)</td><td>(89.7)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">age25-44:raceBAME</td><td>1.4</td><td>0.5</td><td>0.6</td></tr>
+<tr><td style="text-align:left"></td><td>(0.8)</td><td>(0.7)</td><td>(89.1)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">age45-64:raceBAME</td><td>1.8</td><td>0.1<sup>*</sup></td><td>0.6</td></tr>
+<tr><td style="text-align:left"></td><td>(0.9)</td><td>(1.2)</td><td>(116.2)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">age65+:raceBAME</td><td>1.0</td><td>1.0</td><td>1.0</td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.0)</td><td>(0.0)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>1.4</td><td>3.6<sup>***</sup></td><td>0.3</td></tr>
+<tr><td style="text-align:left"></td><td>(0.4)</td><td>(0.4)</td><td>(0.7)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Akaike Inf. Crit.</td><td>2,098.3</td><td>2,098.3</td><td>2,098.3</td></tr>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="3" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>

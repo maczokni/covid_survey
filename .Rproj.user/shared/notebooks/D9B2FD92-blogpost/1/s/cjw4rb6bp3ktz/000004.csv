@@ -1,0 +1,5 @@
+"0","fit <- glm(precqof_binary~foc19, data=data ,family=binomial(), weights = weight)
+"
+"2","Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : 
+  contrasts can be applied only to factors with 2 or more levels
+"

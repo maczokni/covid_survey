@@ -1,0 +1,13 @@
+"0","summarytools::ctable(as_factor(data$b_foc), as_factor(data$b_prec), style = 'rmarkdown')
+"
+"1","### Cross-Tabulation, Row Proportions  
+#### as_factor(data$b_foc) * as_factor(data$b_prec)  
+
+|                       |                        |             |            |               |
+|----------------------:|-----------------------:|------------:|-----------:|--------------:|
+|                       | as_factor(data$b_prec) |         Yes |         No |         Total |
+| as_factor(data$b_foc) |                        |             |            |               |
+|                   Yes |                        | 660 (95.1%) | 34 ( 4.9%) |  694 (100.0%) |
+|                    No |                        | 337 (84.7%) | 61 (15.3%) |  398 (100.0%) |
+|                 Total |                        | 997 (91.3%) | 95 ( 8.7%) | 1092 (100.0%) |
+"

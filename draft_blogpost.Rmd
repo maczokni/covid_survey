@@ -1,0 +1,497 @@
+---
+title: "Blog Draft"
+author: "Reka Solymosi"
+date: "21/05/2020"
+output:
+  word_document: 
+    reference_docx: template.docx
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+
+library(haven)
+library(ggplot2)
+library(tidyr)
+library(stringr)
+library(forcats)
+library(nnet)
+library(stargazer)
+library(broom)
+library(MASS)
+library(dplyr)
+
+#big number problem (https://stackoverflow.com/questions/31551822/how-to-display-coefficients-in-scientific-notation-with-stargazer)
+replace_numbers <-  function(x, cutoff=4, digits=3, scipen=-7) {
+  ifelse(nchar(x) < cutoff, x, prettyNum(as.numeric(x), digits=digits, scientific=scipen))
+}
+
+# read in data
+data <- read_dta("https://www.dropbox.com/s/04drikxtrznjogd/Covid-19_Police_Study_Longitudinal.dta?dl=1")
+#filter out people who didn't answer foc-19 Q
+data <- data %>% filter(!is.na(b_foc)) %>% mutate(weight = ifelse(is.na(weight), 1, weight))
+
+```
+
+
+# Fear of Covid-19 as functional
+
+Bojo quipping that it’s easier to take away people’s freedoms than give them back .... simplest accounts frame reluctance of people as fear or anxiety (eg guardian report of that survey) but it’s not clear whether it’s fear or care, or norms backed up by legal requirement to signal solidarity
+
+
+"Fear" of covid-19 is something that can (and should) be unpacked as something more complex than an image of someone sitting at home too terrified to go out and "take back their freedoms". In this sense, fear of covid-19 shares similarities with the concept of "fear of crime". 
+
+Fear of crime has been understood by academics and policy makers as a range of very different attitues, emotions, and behaviours. In the study of fear of crime, people's worry has been understood as a range of things, from a general anxiety people feel about all sorts of changes in society (loss of respect, influx of new social groups, decline of manufacturing and of the UK's global status), through a general reaction to neighbourhood breakdown and stability, to a more specific assessment of crime risk.  
+
+
+But depending on how this fear of crime is understood will affect how it is measured. If we just ask people about their worry, and make assumptions that this worry meas they will stay inside and not function properly, then we might be missing a more important story, about how it is actually people's reactions to their fear of crime that might be of more interest. 
+
+
+In fact, psychological literature tells us that fear may be a good thing -it may drive healthy and beneficial activities that aim to minimise the risks of the thing being feared. 
+
+
+In line with developments in fear of crime research, we propose that fear of covid-19 can be understood as: 
+
+- something that people experience in certain situations and certain times, but not as an overwhelming characteristic 
+- something that may encourage people to act in ways that minimise their risk of exposure to covid-19
+
+
+# The study
+
+Blabla
+
+
+# Findings
+
+
+## General anxiety v worry
+
+```{r focfreqtb, echo=FALSE}
+
+foc_tab <- data %>% filter(!is.na(b_foc)) %>% group_by(b_foc) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0))
+covconc_tab <- data %>% filter(!is.na(b_covconc)) %>% group_by(b_covconc) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0))
+
+```
+
+
+In total, to the question "In the past 3 weeks, have you ever felt worried about getting COVID-19?", `r foc_tab %>% filter(b_foc == 2) %>% pull(perc)`% of people said that "No", they had not felt worried about getting COVID-19 in the past 3 weeks, while  `r foc_tab %>% filter(b_foc == 1) %>% pull(perc)`% of people said they had a specific episode or situation in which they experienced worry about getting COVID-19. In contrast, when asked the more general question "How concerned are you about getting Covid-19?", only `r sum(covconc_tab %>% filter(b_covconc < 3) %>% pull(perc))`% of them said they are "Not concerned at all" or "Not really concerned". This leaves a difference of the `r foc_tab %>% filter(b_foc == 2) %>% pull(perc) -  sum(covconc_tab %>% filter(b_covconc < 3) %>% pull(perc))`%, which is `r foc_tab %>% filter(b_foc == 2) %>% pull(n) -  sum(covconc_tab %>% filter(b_covconc < 3) %>% pull(n))` people who feel general concern/worry, but did not actually experience any incidences of worry in the past 3 weeks. - *(could this be because they are staying inside though??)* 
+
+<!-- , versus the `r sum(covconc_tab %>% filter(b_covconc %in% c("Concerned", "Very concerned")) %>% pull(perc))`% who said they are either "Concerned" or "Very concerned" (the other `r sum(covconc_tab %>% filter(b_covconc %in% c("Neither concerned or unconcerned")) %>% pull(perc))`% said they were neither concerned nor unconcerned).  -->
+
+```{r freq_tab}
+freq_tab <- data %>% 
+  filter(!is.na(b_focfr)) %>% 
+  group_by(b_focfr) %>% 
+  count() %>% 
+  mutate(perc = round(n / sum(.$n)*100,0)) 
+
+```
+
+
+Even those who said "Yes" they experienced a specific instance of worry vary in the frequency and intensity of these events.   `r freq_tab %>% filter(b_focfr == 1) %>%  pull(perc)`% of these worried people only experienced worry "Once or twice" in this timeframe: 
+
+
+```{r frequchart}
+
+ggplot(freq_tab, aes(x = as_factor(b_focfr), y = perc/100)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label=paste0("n = ", n)),vjust=3, col = "white") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.4)) +
+  xlab("Frequency of worry") + 
+  ylab("Percent of respondents") + 
+  labs(title = "How frequently have you felt worried about getting \nCOVID-19in the last three weeks?") +
+  theme_minimal() + 
+  theme(axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10))
+```
+
+```{r focintense}
+focintense<- data %>% 
+  filter(!is.na(b_focwo)) %>% 
+  group_by(b_focwo) %>% 
+  count() %>% 
+  mutate(perc = round(n / sum(.$n)*100,0))
+
+```
+
+
+And the intensity of this worry varies as well. When asked: "On the last occasion, how worried did you feel?" `r focintense %>% filter(b_focwo == 6) %>% pull(perc)`% of people said they had felt only "A little bit worried". (Also `r focintense %>% filter(b_focwo == 1) %>% pull(n)` people said they felt "Not worried at all" on their last occasion of worry, but I have no idea what to make of them...!)
+
+
+```{r focintensegraph}
+
+ ggplot(focintense, aes(x = as_factor(b_focwo), y = perc/100)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label=paste0("n = ", n)),vjust=-1.5, col = "black") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.5)) +
+  xlab("Intensity of worry") + 
+  ylab("Percent of respondents") + 
+  labs(title = "On the last occasion [of worry], \nhow worried did you feel?") +
+  theme_minimal() + 
+  theme(axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10), 
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+Evidently people experience worry about covid-19 differently, and summing them into one "worried" group masks a lot of variation in experiences, and possible behaviours that people might adopt to address this worry. 
+
+## Functional fear
+
+Literature examining fear of crime differentiates between a "dysfunctional worry" that erodes quality of life and a "functional worry" that motivates vigilance and routine precautions. The same thinking could be applied to fear of covid-19. 
+
+
+In fact if we look at the relationship between experiencing worry in the last 3 weeks and taking precautions, we can see that those who said Yes to experiencing worry have 3 and a half times the odds of those who said no, that they will be taking precautions against Covid-19
+
+
+```{r}
+summarytools::ctable(as_factor(data$b_foc), as_factor(data$b_prec), style = 'rmarkdown')
+```
+
+
+
+
+
+Based on people's experiences of worry, and the extent to which that impacts quality of life, or motivates them to take precautions to mitigate risk, we can classify them into the following groups: 
+
+
+**TO DO:** Name groups
+
+- Group 1: Unworried (these people are not worried about covid-19)
+- Group 2: Confusing people (Worried, don't take precautions)
+- Group 3: Functional worry (Worried, take precautions, quality of life is not affected)
+- Group 4: Worried people who take precautions but QoL is reduced (Worried, take precautions, quality of life is affected)
+
+```{r assign groups}
+
+data <- data %>% 
+  mutate(foc19 = case_when(
+          # Unworried
+          b_foc==2 ~ "Group 1", # not worried
+          # Worried no prec
+          b_foc==1 &  b_prec==2 ~ "Group 2",
+          # Functional
+          b_foc==1 & # worried about catching covid in past 3 weeks
+          b_focqol < 7 &  #  quality of life is not reduced by worry
+          b_prec==1  ~ "Group 3", #  quality of life is not reduced by precaution
+          #Dysfunctional
+          b_foc== 1 & # worried about covid
+            b_focqol > 6  & #quality of life affected by worry
+            b_prec==1  ~ "Group 4", #takes precautions 
+          TRUE ~ NA_character_)    #everyone else (these are all wave 1 people now)
+    ) 
+
+data$foc19 <- factor(data$foc19, levels = c("Group 1","Group 2", "Group 3","Group 4" ))
+
+
+```
+
+```{r}
+
+knitr::kable(data %>% group_by(foc19) %>% count() %>% 
+  mutate(percent = round(n / sum(.$n)*100,0)) %>% rename(`Worry Group` = foc19, 
+                                                         N = n, 
+                                                         Percent = percent))
+
+```
+
+
+We can look at which groups take what precautions. Group 2 obviously don't as this was a criteria for being in this group. But we can look at the others. 
+
+Group 1 group actually do take quite a lot of precautions, despite being unworried.  
+
+Social distancing and avoiding transport are pretty uniform across groups, which makes sense as these are government recommended precautions. 
+
+
+The dysfunctional worry group take more precautions that go above and beyond these recommendations: wearing PPE, using a different route or travelling a different time, or avoiding going out entirely. 
+
+
+In some ways the easiest and least impactful precaution is to wash your hands. Annoyingly we didn't actually ask this, but it came up in a free text other category, and this suggests that this is the one precaution that the other groups mention more, perhaps because the dysfunctional fear group do the other things so much more that this doesn't feature. BUT I'm not sure we can actually use this, because it's got a low n, because people had to be bothered to write it into the "other" category... 
+
+```{r}
+
+thing <- data %>% mutate(b_prectyp_hw = ifelse(grepl("hand", tolower(data$b_prectypo)) & grepl("wash", tolower(data$b_prectypo)), "Washing hands", NA)) %>% select(c(starts_with("b_prectyp_"), foc19)) %>% select(-b_prectyp_11) %>%  mutate_all(as_factor) %>% pivot_longer(-foc19, "prec") %>% filter(!is.na(value)) %>% select(-prec) %>% group_by(foc19, value) %>% count()
+
+ggplot(thing, aes(x = foc19, y = n)) + 
+  geom_bar(stat= "identity") + 
+  facet_wrap(~value, scales = "free", labeller = label_wrap_gen(width = 38, multi_line = TRUE)) + 
+  xlab("") + 
+  ylab("Number of people") + 
+  theme_minimal()
+
+
+```
+
+
+## Do the precs you take reduce QoL?
+
+
+```{r}
+
+data <- data %>% mutate(precqof_binary = case_when(b_precqof < 7 ~ "No reduction in quality of life", 
+                                                   b_precqof > 6 ~ "Reduced quality of life"))
+
+```
+
+
+```{r}
+
+data %>% group_by(foc19, precqof_binary) %>% 
+  filter(!is.na(precqof_binary)) %>% 
+  summarise(n = sum(weight, na.rm = T)) %>% #sum weight 
+  mutate(percent = n / sum(n)) %>% 
+  ggplot(., aes(x = foc19, y = percent, fill = precqof_binary)) + 
+  geom_bar(stat = "identity", position = "stack", col = "black") + 
+  theme_minimal() + 
+  scale_fill_manual(values=c("#FFFFFF", "#000000"), name = "Effect of precautions \non quality of life") + 
+  scale_y_continuous(labels = scales::percent) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    xlab("") + 
+    ylab("Percent") + 
+  labs(title = "Extent to which precautions taken by \ndifferent worry groups affect their \nquality of life")
+
+
+```
+
+
+```{r}
+
+fit <- glm(as_factor(precqof_binary)~foc19, data=data ,family=binomial(), weights = weight)
+
+stargazer(fit, type="text", p.auto=FALSE, apply.coef = exp, ci = FALSE)
+
+
+```
+
+
+Compared to the unworried group, the functionally worried group have about 40% the odds of the precautions they take reducing their quality of life. On the other hand, the disfuctionally worried group's precautions have over twice the odds of the unworried group that their precautions reduce their quality of life. 
+
+
+# Who are these people?
+
+## Boring stuff 
+
+
+```{r}
+
+multi1_df <- data %>% select(foc19, age, gender, race, weight) %>% 
+  mutate(race = as_factor(race), 
+         race = case_when(
+    grepl("Asian or Asian British", race) |
+    grepl("Black or Black British", race) |
+    grepl("Mixed", race) ~ "BAME",
+    grepl("White", race) ~ "White", 
+    TRUE ~ "Other or did not say"
+          )
+  ) %>% 
+  mutate_at(vars(-weight), as_factor) %>% filter(gender != "Non-binary", race != "Other or did not say") %>%
+  droplevels
+
+# multi1_df$foc19 = relevel(multi1_df$foc19, ref = "Group 1")
+# multi1 <- multinom(foc19 ~ age + gender + race, data=multi1_df, weights = weight)
+# multi1.rrr = exp(coef(multi1))
+# 
+# stargazer(multi1, type="text", p.auto=FALSE, apply.coef = exp, ci = FALSE)
+
+```
+
+How demographics vary across groups
+
+```{r}
+
+multi1_df$foc19 <- factor(multi1_df$foc19, levels = c("Group 1","Group 2", "Group 3","Group 4" ))
+
+multi2 <- multinom(foc19 ~ age * gender + race*gender +  age * race, data=multi1_df, weights = weight)
+multi2.rrr = exp(coef(multi2))
+stargazer(multi2, p.auto=FALSE, apply.coef = exp, ci = FALSE,  type='text', header = F, digit.separator = '')
+
+```
+
+
+## Worry, knowledge, experience with covid19
+
+```{r}
+data <- data %>% mutate(lost_job = ifelse(!is.na(b_covidaffect_1) |!is.na(a_covidaffect_1), 1, 0),
+                        no_food = ifelse(!is.na(b_covidaffect_5) |!is.na(a_covidaffect_5), 1, 0), 
+                        someone_in_hospital= ifelse(!is.na(b_covidaffect_7) |!is.na(a_covidaffect_7), 1, 0), 
+                        lost_someone = ifelse(!is.na(b_covidaffect_8) |!is.na(a_covidaffect_8), 1, 0), 
+                        had_cov = case_when(
+                          b_cov < 4 |
+                            a_cov < 4  ~ "Yes",
+                           b_cov == 4 |
+                            a_cov == 4  ~ "No",
+                          b_cov == 5 &
+                            a_cov == 5 ~ NA_character_)
+                        )
+
+
+multi1_df$foc19 <- factor(multi1_df$foc19, levels = c("Group 1","Group 2", "Group 3","Group 4" ))
+
+focm03 <- multinom(foc19 ~ b_covconc + b_covknow + lost_job + no_food + someone_in_hospital + lost_someone + had_cov, data = data, weight = weight)
+focm05 <- multinom(foc19 ~ b_covconc + b_covknow + lost_job + no_food + someone_in_hospital + lost_someone + had_cov +gender + age + race , data = data, weight = weight)
+
+stargazer(focm03,focm05, p.auto=FALSE, apply.coef = exp, ci = FALSE,  type='text', header = F, digit.separator = '')
+
+```
+
+
+
+## Key workers?
+
+
+```{r}
+
+data %>% mutate(a_covidjob = as_factor(a_covidjob)) %>% 
+  filter(!is.na(a_covidjob)) %>% 
+  group_by(foc19, a_covidjob) %>% 
+  summarise(n = sum(weight, na.rm = T)) %>% #sum weight 
+  mutate(percent = n / sum(n), 
+         w_covidjob = str_wrap(a_covidjob, 25)) %>% 
+  ggplot(., aes(x = foc19, y = percent, fill = w_covidjob)) + 
+  geom_bar(stat = "identity", position = "stack", col = "black") + 
+  theme_minimal() + 
+  # scale_fill_manual(values=c("#FFFFFF", "#000000"), name = "Key worker") + 
+  scale_y_continuous(labels = scales::percent) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    xlab("") + 
+    ylab("Percent") + 
+  labs(title = "Are keyworkers in different worry groups?")
+
+
+```
+
+
+# Lockdown compliance
+
+Overall compliance score calculated from people's answers to "How often during the past week have you engaged in each of the following behaviours during the Covid-19 outbreak?" from Never (1) to Very often (5) (with Prefer not to say (7) excluded), the higher the score, the less compliance (the more they engage in non-compliant behaviours ie: Socialised in person with friends or relatives whom they don't live with, Go out for a walk, run, or cycle and spend more than a few minutes sitting somewhere to relax, and/or Travelled for leisure (e.g. driven somewhere to go for a walk)). 
+
+```{r}
+
+data <- data %>% mutate(b_covidcompliance_1 = ifelse(b_covidcompliance_1 == 7, NA, b_covidcompliance_1), 
+                b_covidcompliance_2 = ifelse(b_covidcompliance_2 == 7, NA, b_covidcompliance_2), 
+                b_covidcompliance_3 = ifelse(b_covidcompliance_3 == 7, NA, b_covidcompliance_3), 
+                age = as_factor(age), 
+         gender = as_factor(gender), 
+         area = as_factor(area)) %>% 
+  rowwise() %>% 
+  mutate(covcompsum = sum(b_covidcompliance_1 + b_covidcompliance_2 + b_covidcompliance_3, na.rm = TRUE))  %>% 
+  filter(gender != "Non-binary", race != "Other or did not say") %>%
+  droplevels
+
+
+```
+
+
+```{r}
+
+ggplot(data, aes(x = foc19, y = covcompsum, group = foc19, weight = weight)) + 
+  geom_boxplot()
+
+```
+
+
+```{r}
+
+m01 <- glm.nb(covcompsum ~ foc19, data = data, weight = weight)
+m02 <- glm.nb(covcompsum ~ foc19 + b_covconc, data = data, weight = weight)
+m03 <- glm.nb(covcompsum ~ foc19 + b_covconc + b_covknow, data = data, weight = weight)
+m04 <- glm.nb(covcompsum ~ foc19 + b_covconc+ b_covknow + age*gender + area , data = data, weight = weight)
+stargazer(m01, m02, m03, m04, type="text", p.auto=FALSE, apply.coef = exp, ci = FALSE, header = F, digit.separator = '', omit.stat = "theta")
+```
+
+
+Group 3 (the functionally worried people), are more compliant (less non-compliant) compared with the unworried group as reference. On the other hand once more control variables in the model, dysfunctionally worried people seem to engage in these behaviours more? Maybe they really enjoy these things, and so when they restrict it affects their quality of life a lot more??
+
+On the other hand, when asking specifically for social distancing, it changes, and it is actually the dysfunctionally worried group who seem to engage in more social distancing than the unworried group, while group 2 (worried, no precautions) engage less in social distancing: 
+ 
+ 
+```{r}
+
+data <- data %>% rowwise() %>% 
+  mutate(sdcomplsum = sum(b_sdcompl_1 + b_sdcompl_2 + b_sdcompl_3 + 
+                           b_sdcompl_4 + b_sdcompl_5 + b_sdcompl_6 , na.rm = TRUE))  
+
+
+```
+
+
+<!-- ```{r} -->
+
+<!-- ggplot(data, aes(x = foc19, y = sdcomplsum, group = foc19, weight = weight)) +  -->
+<!--   geom_boxplot() -->
+
+<!-- ``` -->
+
+
+
+<!-- ```{r} -->
+
+<!-- m2 <- glm.nb(sdcomplsum ~ foc19, data = data, weight = weight) -->
+<!-- stargazer(m2, type="text", p.auto=FALSE, apply.coef = exp, ci = FALSE) -->
+<!-- ``` -->
+
+Social distancing score: higher score means they engaged *more* in social distancing. 
+
+Group 2 (worried, no precautions) less likely to socialy distance, group 4 (dysfunctional) more likely than unworried group (reference) to socially distance: 
+
+```{r}
+
+m11 <- glm.nb(sdcomplsum ~ foc19, data = data, weight = weight)
+m12 <- glm.nb(sdcomplsum ~ foc19 + b_covconc, data = data, weight = weight)
+m13 <- glm.nb(sdcomplsum ~ foc19 + b_covconc + b_covknow, data = data, weight = weight)
+m14 <- glm.nb(sdcomplsum ~ foc19 + b_covconc+ b_covknow + age*gender + area , data = data, weight = weight)
+stargazer(m11, m12, m13, m14, type="text", p.auto=FALSE, apply.coef = exp, ci = FALSE, header = F, digit.separator = '')
+
+
+```
+
+# Precautions vs compliance
+
+
+Do different types of precautions mean that people comply less. So for example, how do people perceive wearing a mask? Does it make them feel like they can then take more risks ie engage in more non-compliant behaviour? Along the lines of when a cyclist wears a helmet cars pass closer. 
+
+```{r}
+
+ggplot(data, aes(x = as_factor(b_prec), y = covcompsum,group =  as_factor(b_prec))) + 
+  geom_boxplot() +
+  theme_minimal() + 
+  xlab("Do you take any precautions against getting COVID-19?") + 
+  ylab("Compliance scode (higher = more non-compliance)")
+
+```
+
+Generally it seems that people who take precautions engage in fewer non-compliand behaviours. But what about differential effects of different types of precautions?
+
+```{r}
+
+
+data <- data %>% mutate(soc_dist = ifelse(is.na(b_prectyp_1), 0, 1), 
+                ppe = ifelse(is.na(b_prectyp_6), 0, 1), 
+                avoid_pt = ifelse(is.na(b_prectyp_7), 0, 1),
+                diff_rt_or_time = ifelse(is.na(b_prectyp_8), 0,1 ), 
+                avoid_go_out = ifelse(is.na(b_prectyp_10), 0, 1),
+                wash_hands = ifelse(grepl("hand", tolower(b_prectypo)) & grepl("wash", tolower(b_prectypo)), 1, 0))
+
+m21 <- glm.nb(covcompsum ~ soc_dist + ppe + avoid_pt + diff_rt_or_time + avoid_go_out + wash_hands, data = data, weight = weight)
+m211 <- glm.nb(covcompsum ~ soc_dist + ppe + avoid_pt + diff_rt_or_time + avoid_go_out + wash_hands + foc19, data = data, weight = weight)
+m22 <- glm.nb(covcompsum ~ soc_dist + ppe + avoid_pt + diff_rt_or_time + avoid_go_out + wash_hands + foc19 + b_covconc, data = data, weight = weight)
+m23 <- glm.nb(covcompsum ~ soc_dist + ppe + avoid_pt + diff_rt_or_time + avoid_go_out + wash_hands + foc19 + b_covconc + b_covknow, data = data, weight = weight)
+m24 <- glm.nb(covcompsum ~ soc_dist + ppe + avoid_pt + diff_rt_or_time + avoid_go_out + wash_hands + foc19 + b_covconc+ b_covknow + age*gender + area, data = data, weight = weight)
+stargazer(m21, m22, m23, m24, type="text", p.auto=FALSE, apply.coef = exp, ci = FALSE, header = F, digit.separator = '', omit.stat = "theta")
+
+
+```
+
+Not really, it seems like taking these precautions is not associated with any increase in non-compliance. Avoiding going out entirely means less engagement in non-compliant activities, which all involve going out, so that makes sense...!!
+
+In the fight against the virus
+Our study: freqs for covconc from wave 1 and note not a predictor of lockdown compliance 
+Studies into the inpact of c-19 on mental health
+Our questions: try to tease out frequency and intensity of worry about catching the virus, as well as the qol hit of worry and precautions
+Refer to functional fear literature
+Fearcovid 6 cat breakdown
+What’s the profile of the difffere t groups in terms of boring stuff but also lockdown compliance, social distancing, rule clarity, concern and knowledge; anything else?
+Particularly interested in the functional fear group? Does knowledge, lack of concern about catching the virus, rule clarirty, adherence to 2m social distancing, and adherence to lockdown requirements help them mitigate the impact of worry and precautions on quality of life?

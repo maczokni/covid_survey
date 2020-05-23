@@ -1,0 +1,29 @@
+"0","data <- data %>% 
+  mutate(fearcovid = case_when(
+          # Unworried
+          b_foc==2 ~ ""Group 1"", # not worried
+          # Worried no prec
+          b_foc==1 &  b_prec==2 ~ ""Group 2"",
+          # Functional
+          b_foc==1 & # worried about catching covid in past 3 weeks
+          b_focqol < 7 &  #  quality of life is not reduced by worry
+          b_prec==1 & # take precautions against catching covid
+          b_precqof < 7  ~ ""Group 3"", #  quality of life is not reduced by precaution
+          #Dysfunctional
+          b_foc== 1 & # worried about covid
+            b_focqol > 6  & #quality of life affected by worry
+            b_prec==1 | 
+          #OR
+          b_foc== 1 & # worried about covid
+            b_precqof > 6  & #quality of life affected by prec
+            b_prec==1 ~ ""Group 4"", #takes precautions 
+          #Unknown
+          b_foc==1 &
+          b_prec ==1 & 
+          b_focqol < 7 &
+          is.na(b_precqof) ~ ""Unknowns"",
+          TRUE ~ NA)   #everyone else 
+    )
+"
+"2","Error: must be a character vector, not a logical vector
+"
