@@ -1,3 +1,0 @@
-library(pdftools)
-thing <- pdf_text("/Users/reka/Downloads/Price List 20 .5. 2020 .pdf") %>% strsplit(split = "\n")
-thing [1]

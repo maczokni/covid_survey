@@ -169,21 +169,21 @@ With this in mind, we can classify people into 4 groups:
 data <- data %>% 
   mutate(foc19 = case_when(
           # Unworried
-          b_foc==2 ~ "Group 1", # not worried
+          b_foc==2 ~ "Unworried", # not worried
           # Worried no prec
-          b_foc==1 &  b_prec==2 ~ "Group 2",
+          b_foc==1 &  b_prec==2 ~ "Confused",
           # Functional
           b_foc==1 & # worried about catching covid in past 3 weeks
           b_focqol < 7 &  #  quality of life is not reduced by worry
-          b_prec==1  ~ "Group 3", #  quality of life is not reduced by precaution
+          b_prec==1  ~ "Coping", #  quality of life is not reduced by precaution
           #Dysfunctional
           b_foc== 1 & # worried about covid
             b_focqol > 6  & #quality of life affected by worry
-            b_prec==1  ~ "Group 4", #takes precautions 
+            b_prec==1  ~ "Struggling", #takes precautions 
           TRUE ~ NA_character_)    #everyone else (these are all wave 1 people now)
     ) 
 
-data$foc19 <- factor(data$foc19, levels = c("Group 1","Group 2", "Group 3","Group 4" ))
+data$foc19 <- factor(data$foc19, levels = c("Unworried","Confused", "Coping","Struggling" ))
 
 
 ```

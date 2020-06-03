@@ -1,0 +1,271 @@
+---
+title: "Preliminary analysis of worry about covid19"
+author: "Reka Solymosi"
+date: "03/06/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(haven)
+library(ggplot2)
+library(tidyr)
+library(stringr)
+library(forcats)
+library(nnet)
+library(stargazer)
+library(broom)
+library(MASS)
+library(dplyr)
+
+# read in data
+data <- read_dta("https://www.dropbox.com/s/04drikxtrznjogd/Covid-19_Police_Study_Longitudinal.dta?dl=1")
+#filter out people who didn't answer foc-19 Q
+data <- data %>% filter(!is.na(b_foc)) %>% mutate(weight = ifelse(is.na(weight), 1, weight))
+```
+
+# Prevalence of worry
+
+```{r focfreqtb, echo=FALSE}
+
+foc_tab <- data %>% filter(!is.na(b_foc)) %>% group_by(b_foc) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0))
+
+```
+
+When asked the question "In the past 3 weeks, have you ever felt worried about getting COVID-19?", `r foc_tab %>% filter(b_foc == 2) %>% pull(perc)`% of people said that "No", they had not felt worried about getting COVID-19 in the past 3 weeks. 
+
+
+```{r freq_tab}
+freq_tab <- data %>% 
+  filter(!is.na(b_focfr)) %>% 
+  group_by(b_focfr) %>% 
+  count() %>% 
+  mutate(perc = round(n / sum(.$n)*100,0)) 
+
+```
+
+
+Those who said "Yes" they experienced a specific instance of worry vary in the frequency and intensity of these events. `r freq_tab %>% filter(b_focfr == 1) %>%  pull(perc)`% of these worried people only experienced worry "Once or twice" in the last 3 weeks, while `r freq_tab %>% filter(b_focfr == 8) %>%  pull(perc)` worried more than 10 times in this timeframe: 
+
+
+```{r frequchart}
+
+ggplot(freq_tab, aes(x = as_factor(b_focfr), y = perc/100)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label=paste0("n = ", n)),vjust=3, col = "white") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.4)) +
+  xlab("Frequency of worry") + 
+  ylab("Percent of respondents") + 
+  labs(title = "How frequently have you felt worried about getting \nCOVID-19in the last three weeks?") +
+  theme_minimal() + 
+  theme(axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10))
+```
+
+
+
+# Functional fear
+
+```{r}
+data$b_foc_f <- as_factor(data$b_foc)
+data$b_prec_f <- as_factor(data$b_prec)
+# summarytools::ctable(data$b_foc_f, data$b_prec_f, style = 'rmarkdown')
+
+data <- data %>% 
+  mutate(foc19 = case_when(
+          # Unworried
+          b_foc==2 ~ "Unworried", # not worried
+          # Worried no prec
+          b_foc==1 &  b_prec==2 ~ "Confused",
+          # Functional
+          b_foc==1 & # worried about catching covid in past 3 weeks
+          b_focqol < 7 &  #  quality of life is not reduced by worry
+          b_prec==1  ~ "Coping", #  quality of life is not reduced by precaution
+          #Dysfunctional
+          b_foc== 1 & # worried about covid
+            b_focqol > 6  & #quality of life affected by worry
+            b_prec==1  ~ "Struggling", #takes precautions 
+          TRUE ~ NA_character_)    #everyone else (these are all wave 1 people now)
+    ) 
+
+data$foc19 <- factor(data$foc19, levels = c("Unworried","Confused", "Coping","Struggling" ))
+```
+
+
+Criminological work has found that, while some instances of worry can be destructive and paralysing, some people and some communities have the potential and the willingness to convert worry about crime into constructive action. In our study, the majority of people say ‘yes’ (`r data %>% group_by(b_prec_f) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0)) %>% filter(b_prec_f == "Yes") %>% pull(perc)`%) when we asked ‘do you take any precautions against getting Covid-19?’. 
+
+
+Based on their worries about catching the virus, as well as the self-reported effect of their worries and precautions on quality of life, we can divide research participants into one of four groups:
+
+- The ‘unworried’ group (`r data %>% group_by(foc19) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0)) %>% filter(foc19 == "Unworried") %>% pull(perc)`%): those who had not worried once about catching Covid-19 over the previous three weeks; 
+- The ‘seemingly confused’ group (`r data %>% group_by(foc19) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0)) %>% filter(foc19 == "Confused") %>% pull(perc)`%): those who had worried about catching Covid-19 but did not take any precautions against the virus;
+- The ‘worried but well-being unaffected’ group (`r data %>% group_by(foc19) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0)) %>% filter(foc19 == "Coping") %>% pull(perc)`%): those who had worried, took precautions, and quality of life was not affected; and,
+- The ‘worried and well-being affected’ group (`r data %>% group_by(foc19) %>% count() %>% mutate(perc = round(n / sum(.$n)*100,0)) %>% filter(foc19 == "Struggling") %>% pull(perc)`%): those who had worried, took precautions, and quality of life was affected. 
+
+
+We can now use this classification to explore the effect of fear of COVID-19 on other behaviours and attitudes, while accounting for it's more complex nature. 
+
+
+# Demographic variation in worry about covid19
+
+
+## Race/gender
+
+```{r}
+
+multi1_df <- data %>% select(foc19, age, gender, race, weight) %>% 
+  mutate(race = as_factor(race), 
+         race = case_when(
+    grepl("Asian or Asian British", race) |
+    grepl("Black or Black British", race) |
+    grepl("Mixed", race) ~ "BAME",
+    grepl("White", race) ~ "White", 
+    TRUE ~ "Other or did not say"
+          )
+  ) %>% 
+  mutate_at(vars(-weight), as_factor) %>% filter(gender != "Non-binary", race != "Other or did not say") %>%
+  droplevels
+
+multi1_df %>% 
+  group_by(foc19, race) %>% 
+  summarise(n = sum(weight, na.rm = T)) %>% #sum weight 
+  mutate(percent = n / sum(n)) %>% 
+  ggplot(., aes(x = foc19, y = percent, fill = race)) + 
+  geom_bar(stat = "identity", position = "stack", col = "black") + 
+  theme_minimal() + 
+  scale_fill_manual(values=c("#FFFFFF", "#000000"), name = "Ethnicity") + 
+  scale_y_continuous(labels = scales::percent) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    xlab("") + 
+    ylab("Percent") + 
+  labs(title = "Difference in ethnicity between worry groups") 
+
+
+```
+
+```{r gender}
+multi1_df %>% 
+  group_by(foc19, gender) %>% 
+  summarise(n = sum(weight, na.rm = T)) %>% #sum weight 
+  mutate(percent = n / sum(n)) %>% 
+  ggplot(., aes(x = foc19, y = percent, fill = gender)) + 
+  geom_bar(stat = "identity", position = "stack", col = "black") + 
+  theme_minimal() + 
+  scale_fill_manual(values=c("#FFFFFF", "#000000"), name = "Gender") + 
+  scale_y_continuous(labels = scales::percent) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    xlab("") + 
+    ylab("Percent") + 
+  labs(title = "Difference in gender between worry groups") 
+
+
+```
+
+
+## Key workers
+
+```{r}
+
+data %>% mutate(a_covidjob = as_factor(a_covidjob)) %>% 
+  filter(!is.na(a_covidjob)) %>% 
+  mutate(covjob = ifelse(a_covidjob == "None of these", "Not key worker", "Key worker" )) %>% 
+  group_by(foc19, covjob) %>% 
+  summarise(n = sum(weight, na.rm = T)) %>% #sum weight 
+  mutate(percent = n / sum(n), 
+         w_covidjob = str_wrap(covjob, 25)) %>% 
+  ggplot(., aes(x = foc19, y = percent, fill = w_covidjob)) + 
+  geom_bar(stat = "identity", position = "stack", col = "black") + 
+  theme_minimal() + 
+  scale_fill_manual(values=c("#FFFFFF", "#000000"), name = "Key worker") + 
+  scale_y_continuous(labels = scales::percent) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    xlab("") + 
+    ylab("Percent") + 
+  labs(title = "Are keyworkers in different worry groups?")
+
+
+```
+
+
+# Mental health outcomes between worry groups
+
+## Thinking about how you felt yesterday, overall, how strongly did you feel the following emotions?
+
+```{r covidemotions}
+
+data %>% 
+  select(starts_with("b_covidemotion"), foc19, weight) %>% 
+  pivot_longer(-c(foc19, weight),"emo") %>% 
+  mutate(value = as_factor(value), 
+         emo = case_when(emo == "b_covidemotion_1" ~ "Anxiety", 
+                         emo == "b_covidemotion_2" ~ "Anger", 
+                         emo == "b_covidemotion_3" ~ "Loneliness",
+                         emo == "b_covidemotion_4" ~ "Happiness")) %>% 
+  group_by(foc19, emo, value) %>% 
+  summarise(n = sum(weight, na.rm = T)) %>% #sum weight 
+  mutate(percent = n / sum(n)) %>% 
+  ggplot(., aes(x = foc19, y = percent, fill = value)) + 
+  geom_bar(stat = "identity", position = "stack", col = "black") + 
+  theme_minimal() + 
+  # scale_fill_manual(values=c("#FFFFFF", "#000000"), name = "Key worker") + 
+  scale_y_continuous(labels = scales::percent) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    xlab("") + 
+    ylab("Percent") + 
+  labs(title = "") + 
+  facet_wrap(~emo)
+  
+```
+
+## Overall, how satisfied are you with your life nowadays?
+
+```{r covidsatisf}
+
+data %>% 
+  mutate(b_covidsatisf = as_factor(b_covidsatisf)) %>% 
+  group_by(foc19, b_covidsatisf) %>% 
+  summarise(n = sum(weight, na.rm = T)) %>% #sum weight 
+  mutate(percent = n / sum(n)) %>% 
+  ggplot(., aes(x = foc19, y = percent, fill = b_covidsatisf)) + 
+  geom_bar(stat = "identity", position = "stack", col = "black") + 
+  theme_minimal() + 
+  # scale_fill_manual(values=c("#FFFFFF", "#000000"), name = "Key worker") + 
+  scale_y_continuous(labels = scales::percent) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    xlab("") + 
+    ylab("Percent") + 
+  labs(title = "") 
+  
+  
+
+```
+
+## Overall, to what extent do you feel that the things you do in your life are worthwhile?
+
+```{r covidworth}
+
+data %>% 
+  mutate(b_covidworth = as_factor(b_covidworth)) %>% 
+  group_by(foc19, b_covidworth) %>% 
+  summarise(n = sum(weight, na.rm = T)) %>% #sum weight 
+  mutate(percent = n / sum(n)) %>% 
+  ggplot(., aes(x = foc19, y = percent, fill = b_covidworth)) + 
+  geom_bar(stat = "identity", position = "stack", col = "black") + 
+  theme_minimal() + 
+  # scale_fill_manual(values=c("#FFFFFF", "#000000"), name = "Key worker") + 
+  scale_y_continuous(labels = scales::percent) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    xlab("") + 
+    ylab("Percent") + 
+  labs(title = "") 
+  
+  
+
+```
+
+
+
+
